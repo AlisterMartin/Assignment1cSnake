@@ -279,7 +279,6 @@ void renderGame(const char g[][SIZEX], const string& mess)
 	void paintGrid(const char g[][SIZEX]);
 	//display game title
 	showMessage(clDarkCyan, clMagenta, 0, 0, "___GAME___");
-//TODO: Display date and time from the system
 	showMessage(clWhite, clRed, 40, 0, "FoP Task 1c - " + getDate() + " - " + getTime());
 //TODO: Show course SE/CS4G/CS, group number, students names and ids
 	showMessage(clWhite, clRed, 40, 1, "CS2 - Group D - Alister, Liam, Manoj");
