@@ -29,8 +29,8 @@ using namespace std;
 //---------------------------------------------------------------------------
 
 //defining the size of the grid
-const int  SIZEX(12);    	//horizontal dimension
-const int  SIZEY(10);		//vertical dimension
+const int  SIZEX(15);    	//horizontal dimension
+const int  SIZEY(13);		//vertical dimension
 //defining symbols used for display of the grid and content
 const char SPOT('@');   	//spot
 const char TUNNEL(' ');    	//tunnel
@@ -114,19 +114,21 @@ void setSpotInitialCoordinates(Item& spot, const char maze[][SIZEX])
 
 void setInitialMazeStructure(char maze[][SIZEX])
 { //set the position of the walls in the maze
-//TODO: Amend initial maze configuration (change size changed and inner walls)
   //initialise maze configuration
 	char initialMaze[SIZEY][SIZEX] 	//local array to store the maze structure
-		= { { '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' },
-		{ '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
-		{ '#', ' ', ' ', ' ', ' ', ' ', ' ', '#', '#', ' ', ' ', '#' },
-		{ '#', ' ', ' ', '#', ' ', ' ', ' ', ' ', '#', ' ', ' ', '#' },
-		{ '#', ' ', ' ', '#', ' ', ' ', ' ', ' ', '#', ' ', ' ', '#' },
-		{ '#', ' ', ' ', '#', '#', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
-		{ '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
-		{ '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
-		{ '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
-		{ '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' } };
+		= { { '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' },
+		{ '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+		{ '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+		{ '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+		{ '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+		{ '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+		{ '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+		{ '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+		{ '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+		{ '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+		{ '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+		{ '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
+		{ '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' } };
 	//with '#' for wall, ' ' for tunnel, etc. 
 	//copy into maze structure with appropriate symbols
 	for (int row(0); row < SIZEY; ++row)
@@ -275,10 +277,10 @@ void renderGame(const char g[][SIZEX], const string& mess)
 	string tostring(int x);
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string& message);
 	void paintGrid(const char g[][SIZEX]);
-//TODO: Change the colour of the messages
 	//display game title
-	showMessage(clBlack, clYellow, 0, 0, "___GAME___");
-	showMessage(clWhite, clRed, 40, 0, "FoP Task 1c " + getDate() + " - " + getTime() );
+	showMessage(clDarkCyan, clMagenta, 0, 0, "___GAME___");
+//TODO: Display date and time from the system
+	showMessage(clWhite, clRed, 40, 0, "FoP Task 1c - February 2019   ");
 //TODO: Show course SE/CS4G/CS, group number, students names and ids
 	showMessage(clWhite, clRed, 40, 1, "CS2 - Group D - Alister, Liam, Manoj");
 	//display menu options available
