@@ -36,6 +36,7 @@ const int  SIZEY(13);		//vertical dimension
 const char SPOT('@');   	//spot
 const char TUNNEL(' ');    	//tunnel
 const char WALL('#');    	//border
+const char MOUSE('M');		//mouse
 //defining the command letters to move the spot on the maze
 const int  UP(72);			//up arrow
 const int  DOWN(80); 		//down arrow
@@ -92,9 +93,9 @@ private: int getNode()
 int main()
 {
 	//function declarations (prototypes)
-	void initialiseGame(char g[][SIZEX], char m[][SIZEX], Item& spot);
+	void initialiseGame(char g[][SIZEX], char m[][SIZEX], Item& spot, Item& mouse);
 	void renderGame(const char g[][SIZEX], const string& mess);
-	void updateGame(char g[][SIZEX], const char m[][SIZEX], Item& s, const int kc, string& mess);
+	void updateGame(char g[][SIZEX], const char m[][SIZEX], Item& s, const int kc, string& mess, int& score, Item& mouse);
 	bool wantsToQuit(const int key);
 	bool isArrowKey(const int k);
 	int  getKeyPress();
@@ -104,19 +105,22 @@ int main()
 	char grid[SIZEY][SIZEX];			//grid for display
 	char maze[SIZEY][SIZEX];			//structure of the maze
 	Item spot = { 0, 0, SPOT }; 		//spot's position and symbol
+	Item mouse = {0, 0, MOUSE};			//mouse position and symbol
 	string message("LET'S START...");	//current message to player
+	//TODO: Display!!!!!!!!!!!!!!!!!!!!!!!!!!
+	int score(0);
 
 	//action...
 	seed();								//seed the random number generator
 	SetConsoleTitle("FoP 2018-19 - Task 1c - Game Skeleton");
-	initialiseGame(grid, maze, spot);	//initialise grid (incl. walls and spot)
+	initialiseGame(grid, maze, spot, mouse);	//initialise grid (incl. walls and spot)
 	int key;							//current key selected by player
 	do {
 		renderGame(grid, message);			//display game info, modified grid and messages
 		
 		key = toupper(getKeyPress()); 	//read in  selected key: arrow or letter command
 		if (isArrowKey(key))
-			updateGame(grid, maze, spot, key, message);
+			updateGame(grid, maze, spot, key, message, score, mouse);
 		else
 			message = "INVALID KEY!";  //set 'Invalid key' message
 	} while (!wantsToQuit(key));		//while user does not want to quit
@@ -130,15 +134,17 @@ int main()
 //----- initialise game state
 //---------------------------------------------------------------------------
 
-void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], Item& spot)
+void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], Item& spot, Item& mouse)
 { //initialise grid and place spot in middle
 	void setInitialMazeStructure(char maze[][SIZEX]);
 	void setSpotInitialCoordinates(Item& spot, const char maze[][SIZEX]);
-	void updateGrid(char g[][SIZEX], const char m[][SIZEX], const Item& i);
+	void updateGrid( char g[][SIZEX], const char m[][SIZEX], const Item& i, const Item& mouse);
+	void newMouse(Item& mouse, const char maze[][SIZEX]);
 
-	setInitialMazeStructure(maze);		//initialise maze
-	setSpotInitialCoordinates(spot, maze);
-	updateGrid(grid, maze, spot);		//prepare grid
+	setInitialMazeStructure(maze);		   //initialise maze
+	setSpotInitialCoordinates(spot, maze); //sets spots posititon
+	newMouse(mouse, maze);				   //sets mouses position
+	updateGrid(grid, maze, spot, mouse);		   //prepare grid
 }
 
 void setSpotInitialCoordinates(Item& spot, const char maze[][SIZEX])
@@ -182,17 +188,18 @@ void setInitialMazeStructure(char maze[][SIZEX])
 //----- Update Game
 //---------------------------------------------------------------------------
 
-void updateGame(char grid[][SIZEX], const char maze[][SIZEX], Item& spot, const int keyCode, string& mess)
+void updateGame(char grid[][SIZEX], const char maze[][SIZEX], Item& spot, const int keyCode, string& mess, int& score, Item& mouse)
 { //update game
-	void updateGameData(const char g[][SIZEX], Item& s, const int kc, string& m);
-	void updateGrid(char g[][SIZEX], const char maze[][SIZEX], const Item& s);
-	updateGameData(grid, spot, keyCode, mess);		//move spot in required direction
-	updateGrid(grid, maze, spot);					//update grid information
+	void updateGameData(const char g[][SIZEX], Item& s, const int kc, string& m, int& score, Item& mouse);
+	void updateGrid(char g[][SIZEX], const char maze[][SIZEX], const Item& s, const Item& mouse);
+	updateGameData(grid, spot, keyCode, mess, score, mouse);		//move spot in required direction
+	updateGrid(grid, maze, spot, mouse);					//update grid information
 }
-void updateGameData(const char g[][SIZEX], Item& spot, const int key, string& mess)
+void updateGameData(const char g[][SIZEX], Item& spot, const int key, string& mess, int& score, Item& mouse)
 { //move spot in required direction
 	bool isArrowKey(const int k);
 	void setKeyDirection(int k, int& dx, int& dy);
+	void newMouse(Item& mouse, const char maze[][SIZEX]);
 	assert (isArrowKey(key));
 
 	//reset message to blank
@@ -214,15 +221,26 @@ void updateGameData(const char g[][SIZEX], Item& spot, const int key, string& me
 		//cout << '\a';	//beep the alarm
 		mess = "CANNOT GO THERE!";
 		break;
+	case MOUSE:
+		newMouse(mouse, g);
+		score += 10;
+		break;
 	}
 }
-void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], const Item& spot)
+void newMouse(Item& mouse, const char maze[][SIZEX]) {
+	do {
+		mouse.y = random(SIZEY - 2);      //vertical coordinate in range [1..(SIZEY - 2)]
+		mouse.x = random(SIZEX - 2);		 //horizontal coordinate in range [1..(SIZEX - 2)]
+	} while (maze[mouse.y][mouse.x] != TUNNEL);
+}
+void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], const Item& spot, const Item& mouse)
 { //update grid configuration after each move
 	void placeMaze(char g[][SIZEX], const char b[][SIZEX]);
 	void placeItem(char g[][SIZEX], const Item& spot);
 
 	placeMaze(grid, maze);	//reset the empty maze configuration into grid
 	placeItem(grid, spot);	//set spot in grid
+	placeItem(grid, mouse); //set mouse in grid
 
 }
 
