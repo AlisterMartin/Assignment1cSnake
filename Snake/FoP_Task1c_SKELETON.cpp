@@ -290,8 +290,8 @@ void renderGame(const char g[][SIZEX], const string& mess)
 	//print auxiliary messages if any
 	showMessage(clBlack, clWhite, 40, 8, mess);	//display current message
 
-//TODO: Show your course, your group number and names on screen
 
+	showMessage(clRed, clYellow, 40, 5, "CS2 - Group D - Alister, Liam, Manoj");
 	//display grid contents
 	paintGrid(g);
 }
