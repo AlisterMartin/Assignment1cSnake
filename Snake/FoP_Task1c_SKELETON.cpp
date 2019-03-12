@@ -281,7 +281,7 @@ void renderGame(const char g[][SIZEX], const string& mess)
 //TODO: Display date and time from the system
 	showMessage(clWhite, clRed, 40, 0, "FoP Task 1c - February 2019   ");
 //TODO: Show course SE/CS4G/CS, group number, students names and ids
-	showMessage(clWhite, clRed, 40, 1, "Pascale Vacher                ");
+	showMessage(clWhite, clRed, 40, 1, "CS2 - Group D - Alister, Liam, Manoj");
 	//display menu options available
 //TODO: Show other options availables when ready...
 	showMessage(clRed, clYellow, 40, 3, "TO MOVE - USE KEYBOARD ARROWS ");
@@ -290,8 +290,6 @@ void renderGame(const char g[][SIZEX], const string& mess)
 	//print auxiliary messages if any
 	showMessage(clBlack, clWhite, 40, 8, mess);	//display current message
 
-
-	showMessage(clRed, clYellow, 40, 5, "CS2 - Group D - Alister, Liam, Manoj");
 	//display grid contents
 	paintGrid(g);
 }
