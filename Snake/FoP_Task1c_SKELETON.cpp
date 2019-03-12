@@ -17,6 +17,7 @@
 #include <cassert> 
 #include <string>
 #include <sstream>
+#include <vector>
 using namespace std;
 
 //include our own libraries
@@ -46,6 +47,42 @@ const char QUIT('Q');		//to end the game
 struct Item {
 	int x, y;
 	char symbol;
+};
+
+class Snake {
+	int start = 0;
+	vector<Item> items;
+	vector<int> link;
+	vector<int> free;
+public: Snake()
+	{
+
+	}
+public: void initSnake(const char maze[][SIZEX])
+	{
+		start = 0;
+		do {
+			items.at(start).y = random(SIZEY - 2);      //vertical coordinate in range [1..(SIZEY - 2)]
+			items.at(start).x = random(SIZEX - 2);		 //horizontal coordinate in range [1..(SIZEX - 2)]
+		} while (maze[items.at(start).y][items.at(start).x] == WALL);
+		link.at(start) = 1;
+		do {
+			items.at(link.at(start)).y = random(SIZEY - 2);      //vertical coordinate in range [1..(SIZEY - 2)]  NEEDS CHANGING
+			items.at(link.at(start)).x = random(SIZEX - 2);		 //horizontal coordinate in range [1..(SIZEX - 2)] NEEDS CHANGING
+		} while (maze[items.at(start).y][items.at(start).x] == WALL || (items.at(start).y == items.at(link.at(start)).y && items.at(start).x == items.at(link.at(start)).x));
+	}
+private: int getNode()
+	{
+		assert(!free.empty());
+		int i = 0;
+		while (free.at(i) == 0)
+		{
+			i++;
+		}
+		int r = free.at(i);
+		free.at(i) = 0;
+		return r;
+	}
 };
 
 //---------------------------------------------------------------------------
