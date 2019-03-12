@@ -186,6 +186,7 @@ void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], const Item& spot)
 
 	placeMaze(grid, maze);	//reset the empty maze configuration into grid
 	placeItem(grid, spot);	//set spot in grid
+
 }
 
 void placeMaze(char grid[][SIZEX], const char maze[][SIZEX])
@@ -280,7 +281,7 @@ void renderGame(const char g[][SIZEX], const string& mess)
 	//display game title
 	showMessage(clDarkCyan, clMagenta, 0, 0, "___GAME___");
 	showMessage(clWhite, clRed, 40, 0, "FoP Task 1c - " + getDate() + " - " + getTime());
-//TODO: Show course SE/CS4G/CS, group number, students names and ids
+
 	showMessage(clWhite, clRed, 40, 1, "CS2 - Group D - Alister, Liam, Manoj");
 	//display menu options available
 //TODO: Show other options availables when ready...
@@ -297,13 +298,20 @@ void renderGame(const char g[][SIZEX], const string& mess)
 void paintGrid(const char g[][SIZEX])
 { //display grid content on screen
 	selectBackColour(clBlack);
-	selectTextColour(clWhite);
 	gotoxy(0, 2);
-//TODO: Give a diferent colour to the symbol representing Spot
+
 	for (int row(0); row < SIZEY; ++row)
 	{
-		for (int col(0); col < SIZEX; ++col)
+		for (int col(0); col < SIZEX; ++col) {
+			if (g[row][col] != '@') {
+
+				selectTextColour(clWhite);
+			}
+			else {
+				selectTextColour(clGreen);
+			}
 			cout << g[row][col];	//output cell content
+		}
 		cout << endl;
 	}
 }
