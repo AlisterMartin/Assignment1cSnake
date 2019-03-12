@@ -76,8 +76,8 @@ int main()
 	int key;							//current key selected by player
 	do {
 		renderGame(grid, message);			//display game info, modified grid and messages
-		//TODO: Ensure command letters are not  case sensitive
-		key = getKeyPress(); 	//read in  selected key: arrow or letter command
+		
+		key = toupper(getKeyPress()); 	//read in  selected key: arrow or letter command
 		if (isArrowKey(key))
 			updateGame(grid, maze, spot, key, message);
 		else
@@ -96,19 +96,20 @@ int main()
 void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], Item& spot)
 { //initialise grid and place spot in middle
 	void setInitialMazeStructure(char maze[][SIZEX]);
-	void setSpotInitialCoordinates(Item& spot);
+	void setSpotInitialCoordinates(Item& spot, const char maze[][SIZEX]);
 	void updateGrid(char g[][SIZEX], const char m[][SIZEX], const Item& i);
 
 	setInitialMazeStructure(maze);		//initialise maze
-	setSpotInitialCoordinates(spot);
+	setSpotInitialCoordinates(spot, maze);
 	updateGrid(grid, maze, spot);		//prepare grid
 }
 
-void setSpotInitialCoordinates(Item& spot)
+void setSpotInitialCoordinates(Item& spot, const char maze[][SIZEX])
 { //set spot coordinates inside the grid at random at beginning of game
-//TODO: Ensure Spot does not spwan on inner walls
+	do{
 	spot.y = random(SIZEY - 2);      //vertical coordinate in range [1..(SIZEY - 2)]
-	spot.x = random(SIZEX - 2);      //horizontal coordinate in range [1..(SIZEX - 2)]
+	spot.x = random(SIZEX - 2);		 //horizontal coordinate in range [1..(SIZEX - 2)]
+	} while (maze[spot.y][spot.x] == WALL);
 } 
 
 void setInitialMazeStructure(char maze[][SIZEX])
@@ -170,8 +171,8 @@ void updateGameData(const char g[][SIZEX], Item& spot, const int key, string& me
 		spot.x += dx;	//go in that X direction
 		break;
 	case WALL:  		//hit a wall and stay there
-//TODO: Remove alarm when bumping into walls - too annoying
-		cout << '\a';	//beep the alarm
+
+		//cout << '\a';	//beep the alarm
 		mess = "CANNOT GO THERE!";
 		break;
 	}
@@ -236,12 +237,12 @@ int getKeyPress()
 
 bool isArrowKey(const int key)
 {	//check if the key pressed is an arrow key (also accept 'K', 'M', 'H' and 'P')
-//TODO: Detect UP and DOWN arrow keys as well
+
 	return (key == LEFT) || (key == RIGHT) || (key == UP) || (key == DOWN);
 }
 bool wantsToQuit(const int key)
 {	//check if the user wants to quit (when key is 'Q' or 'q')
-//TODO: Ensure both 'Q' and 'q' are detected
+
 	return key == QUIT;
 }
 
