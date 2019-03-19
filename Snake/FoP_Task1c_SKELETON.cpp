@@ -225,9 +225,6 @@ void updateGameData(const char g[][SIZEX], Snake& spot, const int key, string& m
 		score++;
 		break;
 	case WALL:  		//hit a wall and stay there
-		//cout << '\a';	//beep the alarm
-		mess = "CANNOT GO THERE!";
-		break;
 	case BODY:							//TODO: this should end the game but it doesnt
 		mess = "CANNOT GO THERE!";
 		break;
