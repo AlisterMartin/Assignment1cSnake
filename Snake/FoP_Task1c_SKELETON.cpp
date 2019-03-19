@@ -98,8 +98,9 @@ int main()
 {
 	//function declarations (prototypes)
 	void initialiseGame(char g[][SIZEX], char m[][SIZEX], Snake& spot, Item& mouse);
-	void renderGame(const char g[][SIZEX], const string& mess);
-	void updateGame(char g[][SIZEX], const char m[][SIZEX], Snake& s, const int kc, string& mess, int& score, Item& mouse, int& target);
+	void renderGame(const char g[][SIZEX], const string& mess, const string&, const string&);
+	void updateGame(char g[][SIZEX], const char m[][SIZEX], Snake& s, const int kc, string& mess, int& score, Item& mouse, int& target, int& mouseCount);
+	void makeString(const int&, const int&, string&, string&);
 	bool wantsToQuit(const int key);
 	bool isArrowKey(const int k);
 	int  getKeyPress();
@@ -111,9 +112,9 @@ int main()
 	Snake spot;
 	//Item spot = { 0, 0, SPOT }; 		//spot's position and symbol
 	Item mouse = { 0, 0, MOUSE };			//mouse position and symbol
-	string message("LET'S START...");	//current message to player
+	string stringScore, stringMouse, message("LET'S START...");	//current message to player
 	//TODO: Display!!!!!!!!!!!!!!!!!!!!!!!!!!
-	int score(0), target(5);
+	int score(0), mouseCount(0), target(5);
 
 	//action...
 	seed();								//seed the random number generator
@@ -121,11 +122,11 @@ int main()
 	initialiseGame(grid, maze, spot, mouse);	//initialise grid (incl. walls and spot)
 	int key;							//current key selected by player
 	do {
-		renderGame(grid, message);			//display game info, modified grid and messages
-
+		makeString(score, mouseCount, stringScore, stringMouse);
+		renderGame(grid, message,stringScore,stringMouse);			//display game info, modified grid and messages
 		key = toupper(getKeyPress()); 	//read in  selected key: arrow or letter command
 		if (isArrowKey(key))
-			updateGame(grid, maze, spot, key, message, score, mouse, target);
+			updateGame(grid, maze, spot, key, message, score, mouse, target, mouseCount);
 		else
 			message = "INVALID KEY!";  //set 'Invalid key' message
 	} while (!wantsToQuit(key));		//while user does not want to quit
@@ -195,14 +196,14 @@ void setInitialMazeStructure(char maze[][SIZEX])
 //----- Update Game
 //---------------------------------------------------------------------------
 
-void updateGame(char grid[][SIZEX], const char maze[][SIZEX], Snake& spot, const int keyCode, string& mess, int& score, Item& mouse, int& target)
+void updateGame(char grid[][SIZEX], const char maze[][SIZEX], Snake& spot, const int keyCode, string& mess, int& score, Item& mouse, int& target, int& mouseCount)
 { //update game
-	void updateGameData(const char g[][SIZEX], Snake& s, const int kc, string& m, int& score, Item& mouse, int& target);
+	void updateGameData(const char g[][SIZEX], Snake& s, const int kc, string& m, int& score, Item& mouse, int& target, int& mouseCount);
 	void updateGrid(char g[][SIZEX], const char maze[][SIZEX], Snake& s, const Item& mouse);
-	updateGameData(grid, spot, keyCode, mess, score, mouse, target);		//move spot in required direction
+	updateGameData(grid, spot, keyCode, mess, score, mouse, target, mouseCount);		//move spot in required direction
 	updateGrid(grid, maze, spot, mouse);					//update grid information
 }
-void updateGameData(const char g[][SIZEX], Snake& spot, const int key, string& mess, int& score, Item& mouse, int& target)
+void updateGameData(const char g[][SIZEX], Snake& spot, const int key, string& mess, int& score, Item& mouse, int& target, int& mouseCount)
 { //move spot in required direction
 	bool isArrowKey(const int k);
 	void setKeyDirection(int k, int& dx, int& dy);
@@ -221,6 +222,7 @@ void updateGameData(const char g[][SIZEX], Snake& spot, const int key, string& m
 	{			//...depending on what's on the target position in grid...
 	case TUNNEL:		//can move
 		spot.moveSnake(dx, dy, target);
+		score++;
 		break;
 	case WALL:  		//hit a wall and stay there
 		//cout << '\a';	//beep the alarm
