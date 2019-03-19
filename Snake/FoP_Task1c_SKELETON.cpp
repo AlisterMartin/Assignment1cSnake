@@ -17,7 +17,7 @@
 #include <cassert> 
 #include <string>
 #include <sstream>
-#include <vector>
+#include <deque>
 using namespace std;
 
 //include our own libraries
@@ -51,56 +51,43 @@ struct Item {
 	char symbol;
 };
 
-class Snake {
-	int start = 0;
-	vector<Item> items;
-	vector<int> link;
-	vector<int> free;
-public: Snake()
+class Snake { 
+	/*This is the snake class, it uses a deque which is a double ended queue which allows 
+	me to add to the front of the snake and take from the back to allow it to move easier.*/
+	deque<Item> snake;
+public:
+	Snake()
 	{
 
 	}
-public: void initSnake(const char maze[][SIZEX])
+	void initSnake(const char maze[][SIZEX]) //initialise snake
 	{
-		items.assign(10, { 0, 0, BODY});
-		link.assign(10, -1);
-		free.assign(10, 1);
-		free.at(0) = 0;
-		start = 0;
-		items.at(start).symbol = SPOT;
+		snake.push_front({ 0, 0, SPOT });
 		do {
-			items.at(start).y = random(SIZEY - 2);      //vertical coordinate in range [1..(SIZEY - 2)]
-			items.at(start).x = random(SIZEX - 2);		 //horizontal coordinate in range [1..(SIZEX - 2)]
-		} while (maze[items.at(start).y][items.at(start).x] == WALL);
+			snake.front().y = random(SIZEY - 2);      //vertical coordinate in range [1..(SIZEY - 2)]
+			snake.front().x = random(SIZEX - 2);		 //horizontal coordinate in range [1..(SIZEX - 2)]
+		}while (maze[snake.front().y][snake.front().x] == WALL);
 	}
-private: int getNode()
+	void moveSnake(int dx, int dy, int target) //move the snake
 	{
-	int r;
-		if (!free.empty()) //if there are empty spaces in the lists, return one
+		snake.front().symbol = BODY;
+		snake.push_front({ snake.front().x + dx, snake.front().y + dy, SPOT });
+		if (snake.size() == target)
 		{
-			int i = 0;
-			while (free.at(i) == 0 && i < free.size())
-			{
-				i++;
-			}
-			r = i;
-			free.at(i) = 0;
+			snake.pop_back();
 		}
-		else //if there aren't empty spaces, create one
-		{
-			link.resize(link.size() + 1);
-			items.resize(items.size() + 1);
-			link.at(link.size() - 1) = 0;
-			items.at(items.size() - 1) = { 0, 0, '0' };
-			r = items.size() - 1;
-		}
-		return r;
 	}
-private: void addAtStart(int x, int y)
+	void placeSnake(char g[][SIZEX]) //render the snake
 	{
-
+		for (int i = 0; i < snake.size(); i++)
+		{
+			g[snake.at(i).y][snake.at(i).x] = snake.at(i).symbol;
+		}
 	}
-
+	Item getHead()
+	{
+		return snake.front();
+	}
 };
 
 //---------------------------------------------------------------------------
@@ -110,9 +97,9 @@ private: void addAtStart(int x, int y)
 int main()
 {
 	//function declarations (prototypes)
-	void initialiseGame(char g[][SIZEX], char m[][SIZEX], Item& spot, Item& mouse);
+	void initialiseGame(char g[][SIZEX], char m[][SIZEX], Snake& spot, Item& mouse);
 	void renderGame(const char g[][SIZEX], const string& mess);
-	void updateGame(char g[][SIZEX], const char m[][SIZEX], Item& s, const int kc, string& mess, int& score, Item& mouse);
+	void updateGame(char g[][SIZEX], const char m[][SIZEX], Snake& s, const int kc, string& mess, int& score, Item& mouse, int& target);
 	bool wantsToQuit(const int key);
 	bool isArrowKey(const int k);
 	int  getKeyPress();
@@ -121,11 +108,12 @@ int main()
 	//local variable declarations 
 	char grid[SIZEY][SIZEX];			//grid for display
 	char maze[SIZEY][SIZEX];			//structure of the maze
-	Item spot = { 0, 0, SPOT }; 		//spot's position and symbol
-	Item mouse = {0, 0, MOUSE};			//mouse position and symbol
+	Snake spot;
+	//Item spot = { 0, 0, SPOT }; 		//spot's position and symbol
+	Item mouse = { 0, 0, MOUSE };			//mouse position and symbol
 	string message("LET'S START...");	//current message to player
 	//TODO: Display!!!!!!!!!!!!!!!!!!!!!!!!!!
-	int score(0);
+	int score(0), target(5);
 
 	//action...
 	seed();								//seed the random number generator
@@ -134,10 +122,10 @@ int main()
 	int key;							//current key selected by player
 	do {
 		renderGame(grid, message);			//display game info, modified grid and messages
-		
+
 		key = toupper(getKeyPress()); 	//read in  selected key: arrow or letter command
 		if (isArrowKey(key))
-			updateGame(grid, maze, spot, key, message, score, mouse);
+			updateGame(grid, maze, spot, key, message, score, mouse, target);
 		else
 			message = "INVALID KEY!";  //set 'Invalid key' message
 	} while (!wantsToQuit(key));		//while user does not want to quit
@@ -151,26 +139,27 @@ int main()
 //----- initialise game state
 //---------------------------------------------------------------------------
 
-void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], Item& spot, Item& mouse)
+void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], Snake& spot, Item& mouse)
 { //initialise grid and place spot in middle
 	void setInitialMazeStructure(char maze[][SIZEX]);
 	void setSpotInitialCoordinates(Item& spot, const char maze[][SIZEX]);
-	void updateGrid( char g[][SIZEX], const char m[][SIZEX], const Item& i, const Item& mouse);
+	void updateGrid(char g[][SIZEX], const char m[][SIZEX], Snake& i, const Item& mouse);
 	void newMouse(Item& mouse, const char maze[][SIZEX]);
 
 	setInitialMazeStructure(maze);		   //initialise maze
-	setSpotInitialCoordinates(spot, maze); //sets spots posititon
+	spot.initSnake(maze);
+	//setSpotInitialCoordinates(spot, maze); //sets spots posititon
 	newMouse(mouse, maze);				   //sets mouses position
 	updateGrid(grid, maze, spot, mouse);		   //prepare grid
 }
 
-void setSpotInitialCoordinates(Item& spot, const char maze[][SIZEX])
+/*void setSpotInitialCoordinates(Item& spot, const char maze[][SIZEX])
 { //set spot coordinates inside the grid at random at beginning of game
-	do{
-	spot.y = random(SIZEY - 2);      //vertical coordinate in range [1..(SIZEY - 2)]
-	spot.x = random(SIZEX - 2);		 //horizontal coordinate in range [1..(SIZEX - 2)]
+	do {
+		spot.y = random(SIZEY - 2);      //vertical coordinate in range [1..(SIZEY - 2)]
+		spot.x = random(SIZEX - 2);		 //horizontal coordinate in range [1..(SIZEX - 2)]
 	} while (maze[spot.y][spot.x] == WALL);
-} 
+}*/
 
 void setInitialMazeStructure(char maze[][SIZEX])
 { //set the position of the walls in the maze
@@ -195,7 +184,7 @@ void setInitialMazeStructure(char maze[][SIZEX])
 		for (int col(0); col < SIZEX; ++col)
 			switch (initialMaze[row][col])
 			{
-			//not a direct copy, in case the symbols used are changed
+				//not a direct copy, in case the symbols used are changed
 			case '#': maze[row][col] = WALL; break;
 			case ' ': maze[row][col] = TUNNEL; break;
 			}
@@ -205,19 +194,19 @@ void setInitialMazeStructure(char maze[][SIZEX])
 //----- Update Game
 //---------------------------------------------------------------------------
 
-void updateGame(char grid[][SIZEX], const char maze[][SIZEX], Item& spot, const int keyCode, string& mess, int& score, Item& mouse)
+void updateGame(char grid[][SIZEX], const char maze[][SIZEX], Snake& spot, const int keyCode, string& mess, int& score, Item& mouse, int& target)
 { //update game
-	void updateGameData(const char g[][SIZEX], Item& s, const int kc, string& m, int& score, Item& mouse);
-	void updateGrid(char g[][SIZEX], const char maze[][SIZEX], const Item& s, const Item& mouse);
-	updateGameData(grid, spot, keyCode, mess, score, mouse);		//move spot in required direction
+	void updateGameData(const char g[][SIZEX], Snake& s, const int kc, string& m, int& score, Item& mouse, int& target);
+	void updateGrid(char g[][SIZEX], const char maze[][SIZEX], Snake& s, const Item& mouse);
+	updateGameData(grid, spot, keyCode, mess, score, mouse, target);		//move spot in required direction
 	updateGrid(grid, maze, spot, mouse);					//update grid information
 }
-void updateGameData(const char g[][SIZEX], Item& spot, const int key, string& mess, int& score, Item& mouse)
+void updateGameData(const char g[][SIZEX], Snake& spot, const int key, string& mess, int& score, Item& mouse, int& target)
 { //move spot in required direction
 	bool isArrowKey(const int k);
 	void setKeyDirection(int k, int& dx, int& dy);
 	void newMouse(Item& mouse, const char maze[][SIZEX]);
-	assert (isArrowKey(key));
+	assert(isArrowKey(key));
 
 	//reset message to blank
 	mess = "";
@@ -227,22 +216,23 @@ void updateGameData(const char g[][SIZEX], Item& spot, const int key, string& me
 	setKeyDirection(key, dx, dy);
 
 	//check new target position in grid and update game data (incl. spot coordinates) if move is possible
-	switch (g[spot.y + dy][spot.x + dx])
+	switch (g[spot.getHead().y + dy][spot.getHead().x + dx])
 	{			//...depending on what's on the target position in grid...
 	case TUNNEL:		//can move
-		spot.y += dy;	//go in that Y direction
-		spot.x += dx;	//go in that X direction
+		spot.moveSnake(dx, dy, target);
 		break;
 	case WALL:  		//hit a wall and stay there
-
 		//cout << '\a';	//beep the alarm
+		mess = "CANNOT GO THERE!";
+		break;
+	case BODY:							//TODO: this should end the game but it doesnt
 		mess = "CANNOT GO THERE!";
 		break;
 	case MOUSE:
 		newMouse(mouse, g);
+		target += 2;
 		score += 10;
-		spot.y += dy;
-		spot.x += dx;
+		spot.moveSnake(dx, dy, target);
 		break;
 	}
 }
@@ -252,13 +242,15 @@ void newMouse(Item& mouse, const char maze[][SIZEX]) {
 		mouse.x = random(SIZEX - 2);		 //horizontal coordinate in range [1..(SIZEX - 2)]
 	} while (maze[mouse.y][mouse.x] != TUNNEL);
 }
-void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], const Item& spot, const Item& mouse)
+void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], Snake& spot, const Item& mouse)
 { //update grid configuration after each move
 	void placeMaze(char g[][SIZEX], const char b[][SIZEX]);
+	
 	void placeItem(char g[][SIZEX], const Item& spot);
 
 	placeMaze(grid, maze);	//reset the empty maze configuration into grid
-	placeItem(grid, spot);	//set spot in grid
+	//placeItem(grid, spot);	//set spot in grid
+	spot.placeSnake(grid);
 	placeItem(grid, mouse); //set mouse in grid
 
 }
@@ -280,7 +272,7 @@ void placeItem(char g[][SIZEX], const Item& item)
 void setKeyDirection(const int key, int& dx, int& dy)
 { //calculate direction indicated by key
 	bool isArrowKey(const int k);
-	assert (isArrowKey(key));
+	assert(isArrowKey(key));
 	switch (key)	//...depending on the selected key...
 	{
 	case LEFT:  	//when LEFT arrow pressed...
@@ -291,12 +283,12 @@ void setKeyDirection(const int key, int& dx, int& dy)
 		dx = +1;	//increase the X coordinate
 		dy = 0;
 		break;
-	case UP:  	
-		dx = 0;	
+	case UP:
+		dx = 0;
 		dy = -1;
 		break;
-	case DOWN: 	
-		dx = 0;	
+	case DOWN:
+		dx = 0;
 		dy = +1;
 		break;
 	}
@@ -309,7 +301,7 @@ int getKeyPress()
 	keyPressed = _getch();			//read in the selected arrow key or command letter
 	while (keyPressed == 224) 		//ignore symbol following cursor key
 		keyPressed = _getch();
-	return keyPressed;				 
+	return keyPressed;
 }
 
 bool isArrowKey(const int key)
@@ -333,7 +325,7 @@ string tostring(int x)
 	os << x;
 	return os.str();
 }
-string tostring(char x) 
+string tostring(char x)
 {	//convert a char to a string
 	std::ostringstream os;
 	os << x;
@@ -393,6 +385,6 @@ void paintGrid(const char g[][SIZEX])
 void endProgram()
 {
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string& message);
-	showMessage(clRed, clYellow, 40, 8, "BYE!");	
+	showMessage(clRed, clYellow, 40, 8, "BYE!");
 	system("pause");	//hold output screen until a keyboard key is hit
 }
