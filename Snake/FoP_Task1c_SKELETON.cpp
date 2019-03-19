@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------
-//Program: Skeleton for Task 1c – group assignment
+//Program: Skeleton for Task 1c ï¿½ group assignment
 //Author: Pascale Vacher
 //Last updated: 23 February 2018
 //---------------------------------------------------------------------------
@@ -129,7 +129,8 @@ int main()
 		else
 			message = "INVALID KEY!";  //set 'Invalid key' message
 	} while (!wantsToQuit(key));		//while user does not want to quit
-	renderGame(grid, message);			//display game info, modified grid and messages
+	makeString(score, mouseCount, stringScore, stringMouse);
+	renderGame(grid, message, stringScore, stringMouse);			//display game info, modified grid and messages
 	endProgram();						//display final message
 	return 0;
 }
@@ -231,6 +232,7 @@ void updateGameData(const char g[][SIZEX], Snake& spot, const int key, string& m
 	case MOUSE:
 		newMouse(mouse, g);
 		target += 2;
+		mouseCount++;
 		score += 10;
 		spot.moveSnake(dx, dy, target);
 		break;
@@ -338,7 +340,7 @@ void showMessage(const WORD backColour, const WORD textColour, int x, int y, con
 	selectTextColour(textColour);
 	cout << message + string(40 - message.length(), ' ');
 }
-void renderGame(const char g[][SIZEX], const string& mess)
+void renderGame(const char g[][SIZEX], const string& mess, const string& score, const string& mouseCount)
 { //display game title, messages, maze, spot and other items on screen
 	string tostring(char x);
 	string tostring(int x);
@@ -357,8 +359,22 @@ void renderGame(const char g[][SIZEX], const string& mess)
 	//print auxiliary messages if any
 	showMessage(clBlack, clWhite, 40, 8, mess);	//display current message
 
+	showMessage(clBlack, clWhite, 40, 9, score);
+	showMessage(clBlack, clWhite, 40, 10, mouseCount);
+
 	//display grid contents
 	paintGrid(g);
+}
+
+void makeString(const int& score, const int& mice, string& stringScore, string& stringMouse) {
+	ostringstream sout;
+	istringstream sin;
+	sout << "Score:" << score;
+	stringScore = sout.str();
+	sout.str("");
+	sout << mice << " mice collected out of 7";
+	stringMouse = sout.str();
+	sout.str("");
 }
 
 void paintGrid(const char g[][SIZEX])
