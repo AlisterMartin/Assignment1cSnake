@@ -34,6 +34,7 @@ const int  SIZEX(15);    	//horizontal dimension
 const int  SIZEY(13);		//vertical dimension
 //defining symbols used for display of the grid and content
 const char SPOT('@');   	//spot
+const char BODY('o');		//snake body
 const char TUNNEL(' ');    	//tunnel
 const char WALL('#');    	//border
 const char MOUSE('M');		//mouse
@@ -61,29 +62,45 @@ public: Snake()
 	}
 public: void initSnake(const char maze[][SIZEX])
 	{
+		items.assign(10, { 0, 0, BODY});
+		link.assign(10, -1);
+		free.assign(10, 1);
+		free.at(0) = 0;
 		start = 0;
+		items.at(start).symbol = SPOT;
 		do {
 			items.at(start).y = random(SIZEY - 2);      //vertical coordinate in range [1..(SIZEY - 2)]
 			items.at(start).x = random(SIZEX - 2);		 //horizontal coordinate in range [1..(SIZEX - 2)]
 		} while (maze[items.at(start).y][items.at(start).x] == WALL);
-		link.at(start) = 1;
-		do {
-			items.at(link.at(start)).y = random(SIZEY - 2);      //vertical coordinate in range [1..(SIZEY - 2)]  NEEDS CHANGING
-			items.at(link.at(start)).x = random(SIZEX - 2);		 //horizontal coordinate in range [1..(SIZEX - 2)] NEEDS CHANGING
-		} while (maze[items.at(start).y][items.at(start).x] == WALL || (items.at(start).y == items.at(link.at(start)).y && items.at(start).x == items.at(link.at(start)).x));
 	}
 private: int getNode()
 	{
-		assert(!free.empty());
-		int i = 0;
-		while (free.at(i) == 0)
+	int r;
+		if (!free.empty()) //if there are empty spaces in the lists, return one
 		{
-			i++;
+			int i = 0;
+			while (free.at(i) == 0 && i < free.size())
+			{
+				i++;
+			}
+			r = i;
+			free.at(i) = 0;
 		}
-		int r = free.at(i);
-		free.at(i) = 0;
+		else //if there aren't empty spaces, create one
+		{
+			link.resize(link.size() + 1);
+			items.resize(items.size() + 1);
+			link.at(link.size() - 1) = 0;
+			items.at(items.size() - 1) = { 0, 0, '0' };
+			r = items.size() - 1;
+		}
 		return r;
 	}
+private: void addAtStart(int x, int y)
+	{
+
+	}
+
 };
 
 //---------------------------------------------------------------------------
@@ -224,6 +241,8 @@ void updateGameData(const char g[][SIZEX], Item& spot, const int key, string& me
 	case MOUSE:
 		newMouse(mouse, g);
 		score += 10;
+		spot.y += dy;
+		spot.x += dx;
 		break;
 	}
 }
