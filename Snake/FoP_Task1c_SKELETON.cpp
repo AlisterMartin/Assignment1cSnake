@@ -99,22 +99,23 @@ int main()
 	//function declarations (prototypes)
 	void initialiseGame(char g[][SIZEX], char m[][SIZEX], Snake& spot, Item& mouse);
 	void renderGame(const char g[][SIZEX], const string& mess, const string&, const string&);
-	void updateGame(char g[][SIZEX], const char m[][SIZEX], Snake& s, const int kc, string& mess, int& score, Item& mouse, int& target, int& mouseCount);
+	void updateGame(char g[][SIZEX], const char m[][SIZEX], Snake& s, const int kc, string& mess, int& score, Item& mouse, int& target, int& mouseCount, bool& gameOver);
 	void makeString(const int&, const int&, string&, string&);
 	bool wantsToQuit(const int key);
 	bool isArrowKey(const int k);
 	int  getKeyPress();
-	void endProgram();
+	void endProgram(const bool& gameOver);
 
 	//local variable declarations 
 	char grid[SIZEY][SIZEX];			//grid for display
 	char maze[SIZEY][SIZEX];			//structure of the maze
-	Snake spot;
+	Snake spot;							//Initialise new snake class
 	//Item spot = { 0, 0, SPOT }; 		//spot's position and symbol
 	Item mouse = { 0, 0, MOUSE };			//mouse position and symbol
 	string stringScore, stringMouse, message("LET'S START...");	//current message to player
 	//TODO: Display!!!!!!!!!!!!!!!!!!!!!!!!!!
 	int score(0), mouseCount(0), target(5);
+	bool gameOver(false);
 
 	//action...
 	seed();								//seed the random number generator
@@ -126,13 +127,13 @@ int main()
 		renderGame(grid, message,stringScore,stringMouse);			//display game info, modified grid and messages
 		key = toupper(getKeyPress()); 	//read in  selected key: arrow or letter command
 		if (isArrowKey(key))
-			updateGame(grid, maze, spot, key, message, score, mouse, target, mouseCount);
+			updateGame(grid, maze, spot, key, message, score, mouse, target, mouseCount, gameOver);
 		else
 			message = "INVALID KEY!";  //set 'Invalid key' message
-	} while (!wantsToQuit(key));		//while user does not want to quit
+	} while (!wantsToQuit(key) && !gameOver);		//while user does not want to quit
 	makeString(score, mouseCount, stringScore, stringMouse);
 	renderGame(grid, message, stringScore, stringMouse);			//display game info, modified grid and messages
-	endProgram();						//display final message
+	endProgram(gameOver);						//display final message
 	return 0;
 }
 
@@ -196,14 +197,14 @@ void setInitialMazeStructure(char maze[][SIZEX])
 //----- Update Game
 //---------------------------------------------------------------------------
 
-void updateGame(char grid[][SIZEX], const char maze[][SIZEX], Snake& spot, const int keyCode, string& mess, int& score, Item& mouse, int& target, int& mouseCount)
+void updateGame(char grid[][SIZEX], const char maze[][SIZEX], Snake& spot, const int keyCode, string& mess, int& score, Item& mouse, int& target, int& mouseCount, bool& gameOver)
 { //update game
-	void updateGameData(const char g[][SIZEX], Snake& s, const int kc, string& m, int& score, Item& mouse, int& target, int& mouseCount);
+	void updateGameData(const char g[][SIZEX], Snake& s, const int kc, string& m, int& score, Item& mouse, int& target, int& mouseCount, bool& gameOver);
 	void updateGrid(char g[][SIZEX], const char maze[][SIZEX], Snake& s, const Item& mouse);
-	updateGameData(grid, spot, keyCode, mess, score, mouse, target, mouseCount);		//move spot in required direction
+	updateGameData(grid, spot, keyCode, mess, score, mouse, target, mouseCount, gameOver);		//move spot in required direction
 	updateGrid(grid, maze, spot, mouse);					//update grid information
 }
-void updateGameData(const char g[][SIZEX], Snake& spot, const int key, string& mess, int& score, Item& mouse, int& target, int& mouseCount)
+void updateGameData(const char g[][SIZEX], Snake& spot, const int key, string& mess, int& score, Item& mouse, int& target, int& mouseCount, bool& gameOver)
 { //move spot in required direction
 	bool isArrowKey(const int k);
 	void setKeyDirection(int k, int& dx, int& dy);
@@ -227,6 +228,7 @@ void updateGameData(const char g[][SIZEX], Snake& spot, const int key, string& m
 	case WALL:  		//hit a wall and stay there
 	case BODY:							//TODO: this should end the game but it doesnt
 		mess = "CANNOT GO THERE!";
+		gameOver = true;
 		break;
 	case MOUSE:
 		newMouse(mouse, g);
@@ -397,9 +399,16 @@ void paintGrid(const char g[][SIZEX])
 	}
 }
 
-void endProgram()
+void endProgram(const bool& gameOver)
 {
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string& message);
-	showMessage(clRed, clYellow, 40, 8, "BYE!");
+	if (gameOver)
+	{
+		showMessage(clRed, clYellow, 40, 8, "Game Over");
+	}
+	else
+	{
+		showMessage(clRed, clYellow, 40, 8, "BYE!");
+	}
 	system("pause");	//hold output screen until a keyboard key is hit
 }
