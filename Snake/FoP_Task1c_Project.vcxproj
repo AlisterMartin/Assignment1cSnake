@@ -27,6 +27,7 @@
   <ItemGroup>
     <ClInclude Include="ConsoleUtils.h" />
     <ClInclude Include="RandomUtils.h" />
+    <ClInclude Include="SnakeFunctions.h" />
     <ClInclude Include="TimeUtils.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
