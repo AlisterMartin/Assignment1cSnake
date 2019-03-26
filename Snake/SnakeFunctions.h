@@ -332,13 +332,18 @@ void makeString(const int& score, const int& mice, string& stringScore, string& 
 	sout.str("");
 }
 
-void endProgram(const bool& gameOver)
+void endProgram(const bool& gameOver, const bool& win)
 {
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string& message);
 	if (gameOver)
 	{
 		clrscr();
 		showMessage(clRed, clYellow, 36, 10, "Game Over");
+	}
+	else if (win)
+	{
+		clrscr();
+		showMessage(clGreen, clBlue, 37, 10, "You Win");
 	}
 	else
 	{

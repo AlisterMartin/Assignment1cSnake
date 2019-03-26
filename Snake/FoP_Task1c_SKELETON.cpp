@@ -41,7 +41,7 @@ int main()
 	string stringScore, stringMouse, message("LET'S START...");	//current message to player
 	//TODO: Display!!!!!!!!!!!!!!!!!!!!!!!!!!
 	int score(0), mouseCount(0), target(5);
-	bool gameOver(false);
+	bool gameOver(false), win(false);
 
 	//action...
 	seed();								//seed the random number generator
@@ -56,9 +56,10 @@ int main()
 			updateGame(grid, maze, spot, key, message, score, mouse, target, mouseCount, gameOver);
 		else
 			message = "INVALID KEY!";  //set 'Invalid key' message
-	} while (!wantsToQuit(key) && !gameOver);		//while user does not want to quit
+		mouseCount == 7 ? win = true : win = false;
+	} while (!wantsToQuit(key) && !gameOver && !win);		//while user does not want to quit
 	makeString(score, mouseCount, stringScore, stringMouse);
 	renderGame(grid, message, stringScore, stringMouse);			//display game info, modified grid and messages
-	endProgram(gameOver);						//display final message
+	endProgram(gameOver, win);						//display final message
 	return 0;
 }
