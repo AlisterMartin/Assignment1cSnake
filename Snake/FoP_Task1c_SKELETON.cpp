@@ -101,8 +101,10 @@ int main()
 		makeString(score, mouseCount, stringScore, stringMouse);
 		renderGame(grid, message,stringScore,stringMouse);			//display game info, modified grid and messages
 		key = toupper(getKeyPress()); 	//read in  selected key: arrow or letter command
-		if (isArrowKey(key))
+		if (isArrowKey(key)) {
 			updateGame(grid, maze, spot, key, message, score, mouse, target, mouseCount, gameOver, cheat);
+			showMessage(clBlack, clBlack, 40, 15, "                                                           ");
+		}
 		else if (key == 'c'|| key =='C') {
 			if (!cheat) {
 				showMessage(clDarkYellow, clBlack, 40, 15, "Cheat Mode Enabled!");
