@@ -88,6 +88,7 @@ int main()
 	Snake spot;							//Initialise new snake class
 	//Item spot = { 0, 0, SPOT }; 		//spot's position and symbol
 	Item mouse = { 0, 0, MOUSE };			//mouse position and symbol
+	//Item power = { }
 	string stringScore, stringMouse, message("LET'S START...");	//current message to player
 	int score(0), mouseCount(0), target(4);
 	bool gameOver(false), win(false), cheat(false);
@@ -123,7 +124,6 @@ int main()
 	endProgram(gameOver, win);						//display final message
 	return 0;
 }
-#include "SnakeFunctions.h"
 
 void updateGameData(const char g[][SIZEX], Snake & spot, const int key, string & mess, int & score, Item & mouse, int & target, int & mouseCount, bool & gameOver, const bool& cheat)
 { //move spot in required direction
@@ -150,6 +150,7 @@ void updateGameData(const char g[][SIZEX], Snake & spot, const int key, string &
 		break;
 	case MOUSE:
 		newMouse(mouse, g);
+		//mouseCount % 2 == 0 ? newMouse();
 		if(!cheat)
 			target += 2;
 		mouseCount++;
