@@ -50,18 +50,25 @@ public:
 	}
 	void moveSnake(int dx, int dy, int target) //move the snake
 	{
-		snake.front().symbol = BODY;
-		snake.push_front({ snake.front().x + dx, snake.front().y + dy, SPOT });
 		if (snake.size() == target)
 		{
 			snake.pop_back();
 		}
+		snake.front().symbol = BODY;
+		snake.push_front({ snake.front().x + dx, snake.front().y + dy, SPOT });
+
 	}
 	void placeSnake(char g[][SIZEX]) //render the snake
 	{
 		for (int i = 0; i < snake.size(); i++)
 		{
 			g[snake.at(i).y][snake.at(i).x] = snake.at(i).symbol;
+		}
+	}
+	void setTo4(int& target) {
+		target = 4;
+		while (snake.size() != target) {
+			snake.pop_back();
 		}
 	}
 	Item getHead()
@@ -82,9 +89,8 @@ int main()
 	//Item spot = { 0, 0, SPOT }; 		//spot's position and symbol
 	Item mouse = { 0, 0, MOUSE };			//mouse position and symbol
 	string stringScore, stringMouse, message("LET'S START...");	//current message to player
-	//TODO: Display!!!!!!!!!!!!!!!!!!!!!!!!!!
-	int score(0), mouseCount(0), target(5);
-	bool gameOver(false), win(false);
+	int score(0), mouseCount(0), target(4);
+	bool gameOver(false), win(false), cheat(false);
 
 	//action...
 	seed();								//seed the random number generator
@@ -96,7 +102,18 @@ int main()
 		renderGame(grid, message,stringScore,stringMouse);			//display game info, modified grid and messages
 		key = toupper(getKeyPress()); 	//read in  selected key: arrow or letter command
 		if (isArrowKey(key))
-			updateGame(grid, maze, spot, key, message, score, mouse, target, mouseCount, gameOver);
+			updateGame(grid, maze, spot, key, message, score, mouse, target, mouseCount, gameOver, cheat);
+		else if (key == 'c'|| key =='C') {
+			if (!cheat) {
+				showMessage(clDarkYellow, clBlack, 40, 15, "Cheat Mode Enabled!");
+				cheat = true;
+				spot.setTo4(target);
+			}
+			else {
+				showMessage(clDarkYellow, clBlack, 40, 15, "Cheat Mode Disabled!");
+				cheat = false;
+			}
+		}
 		else
 			message = "INVALID KEY!";  //set 'Invalid key' message
 		mouseCount == 7 ? win = true : win = false;
@@ -108,7 +125,7 @@ int main()
 }
 #include "SnakeFunctions.h"
 
-void updateGameData(const char g[][SIZEX], Snake & spot, const int key, string & mess, int & score, Item & mouse, int & target, int & mouseCount, bool & gameOver)
+void updateGameData(const char g[][SIZEX], Snake & spot, const int key, string & mess, int & score, Item & mouse, int & target, int & mouseCount, bool & gameOver, const bool& cheat)
 { //move spot in required direction
 	assert(isArrowKey(key));
 
@@ -133,7 +150,8 @@ void updateGameData(const char g[][SIZEX], Snake & spot, const int key, string &
 		break;
 	case MOUSE:
 		newMouse(mouse, g);
-		target += 2;
+		if(!cheat)
+			target += 2;
 		mouseCount++;
 		score += 10;
 		spot.moveSnake(dx, dy, target);
@@ -162,9 +180,9 @@ void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], Snake & spot, cons
 
 }
 
-void updateGame(char grid[][SIZEX], const char maze[][SIZEX], Snake & spot, const int keyCode, string & mess, int & score, Item & mouse, int & target, int & mouseCount, bool & gameOver)
+void updateGame(char grid[][SIZEX], const char maze[][SIZEX], Snake & spot, const int keyCode, string & mess, int & score, Item & mouse, int & target, int & mouseCount, bool & gameOver,const bool& cheat)
 { //update game
-	updateGameData(grid, spot, keyCode, mess, score, mouse, target, mouseCount, gameOver);		//move spot in required direction
+	updateGameData(grid, spot, keyCode, mess, score, mouse, target, mouseCount, gameOver, cheat);		//move spot in required direction
 	updateGrid(grid, maze, spot, mouse);					//update grid information
 }
 
@@ -226,7 +244,7 @@ void renderGame(const char g[][SIZEX], const string & mess, const string & score
 	//TODO: Show other options availables when ready...
 	showMessage(clRed, clYellow, 40, 3, "TO MOVE - USE KEYBOARD ARROWS ");
 	showMessage(clRed, clYellow, 40, 4, "TO QUIT - ENTER 'Q'           ");
-
+	showMessage(clRed, clYellow, 40, 5, "TO CHEAT - Enter 'C");
 	//print auxiliary messages if any
 	showMessage(clBlack, clWhite, 40, 8, mess);	//display current message
 
