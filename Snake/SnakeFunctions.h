@@ -297,7 +297,7 @@ void showMessage(const WORD backColour, const WORD textColour, int x, int y, con
 	gotoxy(x, y);
 	selectBackColour(backColour);
 	selectTextColour(textColour);
-	cout << message + string(40 - message.length(), ' ');
+	cout << message /*+ string(40 - message.length(), ' ')*/;
 }
 void renderGame(const char g[][SIZEX], const string& mess, const string& score, const string& mouseCount)
 { //display game title, messages, maze, spot and other items on screen
@@ -337,11 +337,14 @@ void endProgram(const bool& gameOver)
 	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string& message);
 	if (gameOver)
 	{
-		showMessage(clRed, clYellow, 40, 8, "Game Over");
+		clrscr();
+		showMessage(clRed, clYellow, 36, 10, "Game Over");
 	}
 	else
 	{
-		showMessage(clRed, clYellow, 40, 8, "BYE!");
+		clrscr();
+		showMessage(clRed, clYellow, 38, 10, "BYE!");
 	}
+	gotoxy(24, 12);
 	system("pause");	//hold output screen until a keyboard key is hit
 }
