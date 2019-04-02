@@ -66,7 +66,7 @@ public:
 	}
 	void setTo4(int& target) { //reset the snake to original size
 		target = 4;
-		while (snake.size() != target) {
+		while (snake.size() > target) {
 			snake.pop_back(); //take the back item off until it is the original size
 		}
 	}
@@ -112,6 +112,7 @@ int main()
 		else if (key == 'c'|| key =='C') {
 			if (!cheat) {
 				showMessage(clDarkYellow, clBlack, 40, 15, "Cheat Mode Enabled!");
+				cout << "\a\a\a";
 				cheat = true;
 				spot.setTo4(target);
 			}
