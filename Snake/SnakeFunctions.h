@@ -93,7 +93,7 @@ string tostring(char x);
 
 void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string& message);
 
-void renderGame(const char g[][SIZEX], const string& mess, const string& score, const string& mouseCount);
+void renderGame(const char g[][SIZEX], const string& mess, const string& score, const string& mouseCount, const string& highScore);
 
 void makeString(const int& score, const int& mice, string& stringScore, string& stringMouse);
 
@@ -112,3 +112,5 @@ string HighScore(const string& name);
 void writeToFile(const int& score, const string& name);
 
 string getName();
+
+string getHighScore(const string& name);

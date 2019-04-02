@@ -85,6 +85,7 @@ int main()
 	char grid[SIZEY][SIZEX];			//grid for display
 	char maze[SIZEY][SIZEX];			//structure of the maze
 	string name;                        //name of the player
+	string highScore;
 	Snake spot;							//Initialise new snake class
 	//Item spot = { 0, 0, SPOT }; 		//spot's position and symbol
 	Item mouse = { 0, 0, MOUSE };			//mouse position and symbol
@@ -93,9 +94,18 @@ int main()
 	int score(0), mouseCount(0), target(4);
 	bool gameOver(false), win(false), cheat(false);
 
-	//initlizing game
+	//initilize game
 	name = getName();
 
+	//initilize file if it does not exist
+	if (!doesItExist(name)) {
+		initilizeFile(name);
+		highScore = "500";
+	}
+	else 
+	{
+		highScore = getHighScore(name);
+	}
 	//action...
 	seed();								//seed the random number generator
 	SetConsoleTitle("FoP 2018-19 - Task 1c - Game Skeleton");
@@ -103,7 +113,7 @@ int main()
 	int key;							//current key selected by player
 	do {
 		makeString(score, mouseCount, stringScore, stringMouse);
-		renderGame(grid, message,stringScore,stringMouse);			//display game info, modified grid and messages
+		renderGame(grid, message,stringScore,stringMouse, highScore);			//display game info, modified grid and messages
 		key = toupper(getKeyPress()); 	//read in  selected key: arrow or letter command
 		if (isArrowKey(key)) {
 			updateGame(grid, maze, spot, key, message, score, mouse, target, mouseCount, gameOver, cheat, power);
@@ -126,8 +136,12 @@ int main()
 		mouseCount == 7 ? win = true : win = false;
 	} while (!wantsToQuit(key) && !gameOver && !win);		//while user does not want to quit
 	makeString(score, mouseCount, stringScore, stringMouse);
-	renderGame(grid, message, stringScore, stringMouse);			//display game info, modified grid and messages
+	renderGame(grid, message, stringScore, stringMouse, highScore);			//display game info, modified grid and messages
 	endProgram(gameOver, win);						//display final message
+
+	//update file
+	writeToFile(score, name);
+
 	return 0;
 }
 
@@ -252,7 +266,7 @@ void showMessage(const WORD backColour, const WORD textColour, int x, int y, con
 	cout << message /*+ string(40 - message.length(), ' ')*/;
 }
 
-void renderGame(const char g[][SIZEX], const string & mess, const string & score, const string & mouseCount)
+void renderGame(const char g[][SIZEX], const string & mess, const string & score, const string & mouseCount, const string& highScore)
 { //display game title, messages, maze, spot and other items on screen
   //display game title
 	showMessage(clDarkCyan, clMagenta, 0, 0, "___GAME___");
@@ -267,8 +281,9 @@ void renderGame(const char g[][SIZEX], const string & mess, const string & score
 	//print auxiliary messages if any
 	showMessage(clBlack, clWhite, 40, 8, mess);	//display current message
 
-	showMessage(clBlack, clWhite, 40, 9, score);
-	showMessage(clBlack, clWhite, 40, 10, mouseCount);
+	showMessage(clBlack, clWhite, 40, 9, "Current High Score: " + highScore);
+	showMessage(clBlack, clWhite, 40, 10, score);
+	showMessage(clBlack, clWhite, 40, 11, mouseCount);
 
 	//display grid contents
 	paintGrid(g);
@@ -287,7 +302,7 @@ void makeString(const int & score, const int & mice, string & stringScore, strin
 
 void endProgram(const bool & gameOver, const bool & win)
 {
-	void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string& message);
+
 	if (gameOver)
 	{
 		clrscr();
@@ -429,12 +444,7 @@ void writeToFile(const int& score, const string& name) {
 	string currentHS;
 	string fileName = name + ".txt";
 	input.open(fileName, ios::in);
-
 	string strScore = to_string(score);
-	int n = fileName.length();
-	char char_fileName[21];
-	strcpy_s(char_fileName, fileName.c_str());
-
 	getline(input, currentHS);
 	input.close();
 
@@ -447,11 +457,24 @@ void writeToFile(const int& score, const string& name) {
 	}
 }
 
+string getHighScore(const string& name) {
+	string score;
+	ifstream input;
+	string currentHS;
+	string fileName = name + ".txt";
+	input.open(fileName, ios::in);
+	getline(input, currentHS);
+	score = currentHS;
+	input.close();
+
+	return score;
+}
+
 void initilizeFile(const string& name) {
 	ofstream output;
 	string fileName = name + ".txt";
 	output.open(fileName, ios::app);
-	output << 500 << "\r\n";
+	output << 0 << "\r\n";
 	output.close();
 }
 
@@ -475,7 +498,6 @@ string getName() {
 	}
 	selectBackColour(clBlack);
 	clrscr();
-	//system("CLS");
 
 	return name;
 }
