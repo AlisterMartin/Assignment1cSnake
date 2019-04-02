@@ -91,8 +91,8 @@ int main()
 	Item mouse = { 0, 0, MOUSE };			//mouse position and symbol
 	Item power = { 1, 1, TUNNEL };
 	string stringScore, stringMouse, message("LET'S START...");	//current message to player
-	int score(0), mouseCount(0), target(4);
-	bool gameOver(false), win(false), cheat(false);
+	int score(0), mouseCount(0), target(4), delay(400), temp_delay(delay);
+	bool gameOver(false), win(false), cheat(false), speed(false);
 
 	//initilize game
 	name = getName();
@@ -110,13 +110,16 @@ int main()
 	seed();								//seed the random number generator
 	SetConsoleTitle("FoP 2018-19 - Task 1c - Game Skeleton");
 	initialiseGame(grid, maze, spot, mouse, power);	//initialise grid (incl. walls and spot)
-	int key;							//current key selected by player
+	int key;//current key selected by player
+	makeString(score, mouseCount, stringScore, stringMouse);
+	renderGame(grid, message, stringScore, stringMouse);//display game info, modified grid and messages
+	key = toupper(getKeyPress());
 	do {
-		makeString(score, mouseCount, stringScore, stringMouse);
-		renderGame(grid, message,stringScore,stringMouse, highScore);			//display game info, modified grid and messages
-		key = toupper(getKeyPress()); 	//read in  selected key: arrow or letter command
+		Sleep(delay);
+		if (kbhit())
+			key = toupper(getKeyPress());//read in  selected key: arrow or letter command
 		if (isArrowKey(key)) {
-			updateGame(grid, maze, spot, key, message, score, mouse, target, mouseCount, gameOver, cheat, power);
+			updateGame(grid, maze, spot, key, message, score, mouse, target, mouseCount, gameOver, cheat, power, delay);
 			showMessage(clBlack, clBlack, 40, 15, "                                                           ");
 		}
 		else if (key == 'c'|| key =='C') {
@@ -131,9 +134,22 @@ int main()
 				cheat = false;
 			}
 		}
+		else if (key == 'Z') {
+				if (!speed) {
+					temp_delay = delay;
+					delay = 400;
+					speed = true;
+				}
+				else {
+					delay = temp_delay;
+					speed = false;
+				}
+		}
 		else
 			message = "INVALID KEY!";  //set 'Invalid key' message
 		mouseCount == 7 ? win = true : win = false;
+		makeString(score, mouseCount, stringScore, stringMouse);
+		renderGame(grid, message, stringScore, stringMouse);//display game info, modified grid and messages
 	} while (!wantsToQuit(key) && !gameOver && !win);		//while user does not want to quit
 	makeString(score, mouseCount, stringScore, stringMouse);
 	renderGame(grid, message, stringScore, stringMouse, highScore);			//display game info, modified grid and messages
@@ -145,7 +161,7 @@ int main()
 	return 0;
 }
 
-void updateGameData(const char g[][SIZEX], Snake & spot, const int key, string & mess, int & score, Item & mouse, int & target, int & mouseCount, bool & gameOver, const bool& cheat, Item& power)
+void updateGameData(const char g[][SIZEX], Snake & spot, const int key, string & mess, int & score, Item & mouse, int & target, int & mouseCount, bool & gameOver, const bool& cheat, Item& power, int& delay)
 { //move spot in required direction
 	assert(isArrowKey(key));
 
@@ -181,6 +197,7 @@ void updateGameData(const char g[][SIZEX], Snake & spot, const int key, string &
 		}
 		score += 10;
 		spot.moveSnake(dx, dy, target);
+		mouseCount % 2 == 0 && delay !=100 ? delay -= 100 : delay; //speeds up snake every two mice 
 		break;
 	case POWER:
 		power.symbol = TUNNEL;
@@ -213,9 +230,9 @@ void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], Snake & spot, cons
 
 }
 
-void updateGame(char grid[][SIZEX], const char maze[][SIZEX], Snake & spot, const int keyCode, string & mess, int & score, Item & mouse, int & target, int & mouseCount, bool & gameOver,const bool& cheat, Item& power)
+void updateGame(char grid[][SIZEX], const char maze[][SIZEX], Snake & spot, const int keyCode, string & mess, int & score, Item & mouse, int & target, int & mouseCount, bool & gameOver,const bool& cheat, Item& power, int& delay)
 { //update game
-	updateGameData(grid, spot, keyCode, mess, score, mouse, target, mouseCount, gameOver, cheat, power);		//move spot in required direction
+	updateGameData(grid, spot, keyCode, mess, score, mouse, target, mouseCount, gameOver, cheat, power, delay);		//move spot in required direction
 	updateGrid(grid, maze, spot, mouse, power);					//update grid information
 }
 
@@ -289,6 +306,8 @@ void renderGame(const char g[][SIZEX], const string & mess, const string & score
 	paintGrid(g);
 }
 
+
+//creates two strings 1 for showing score the other for showing the ammount of mice collected
 void makeString(const int & score, const int & mice, string & stringScore, string & stringMouse) {
 	ostringstream sout;
 	istringstream sin;
@@ -413,11 +432,11 @@ void setKeyDirection(const int key, int& dx, int& dy)
 		dx = +1;	//increase the X coordinate
 		dy = 0;
 		break;
-	case UP:
+	case UP:		//when UP arrow pressed
 		dx = 0;
 		dy = -1;
 		break;
-	case DOWN:
+	case DOWN:		//when DOWN arrow pressed
 		dx = 0;
 		dy = +1;
 		break;

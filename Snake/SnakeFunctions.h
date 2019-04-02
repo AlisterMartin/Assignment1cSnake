@@ -64,7 +64,7 @@ void setKeyDirection(const int key, int& dx, int& dy);
 //----- Update Game
 //---------------------------------------------------------------------------
 
-void updateGameData(const char g[][SIZEX], Snake& spot, const int key, string& mess, int& score, Item& mouse, int& target, int& mouseCount, bool& gameOver, const bool& cheat, Item& power);
+void updateGameData(const char g[][SIZEX], Snake& spot, const int key, string& mess, int& score, Item& mouse, int& target, int& mouseCount, bool& gameOver, const bool& cheat, Item& power, int& delay);
 
 void placeItem(char g[][SIZEX], const Item& item);
 
@@ -72,7 +72,7 @@ void placeMaze(char grid[][SIZEX], const char maze[][SIZEX]);
 
 void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], Snake& spot, const Item& mouse, const Item& power);
 
-void updateGame(char grid[][SIZEX], const char maze[][SIZEX], Snake& spot, const int keyCode, string& mess, int& score, Item& mouse, int& target, int& mouseCount, bool& gameOver, const bool& cheat, Item& power);
+void updateGame(char grid[][SIZEX], const char maze[][SIZEX], Snake& spot, const int keyCode, string& mess, int& score, Item& mouse, int& target, int& mouseCount, bool& gameOver, const bool& cheat, Item& power, int& delay);
 
 void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], Snake& spot, Item& mouse, Item& power);
 
