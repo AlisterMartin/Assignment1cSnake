@@ -39,10 +39,6 @@ class Snake {
 	me to add to the front of the snake and take from the back to allow it to move easier.*/
 	deque<Item> snake;
 public:
-	Snake()
-	{
-
-	}
 	void initSnake(const char maze[][SIZEX]) //initialise snake
 	{
 		snake.push_front({ 0, 0, SPOT });
@@ -53,25 +49,25 @@ public:
 	}
 	void moveSnake(int dx, int dy, int target) //move the snake
 	{
-		if (snake.size() == target)
+		if (snake.size() == target) //if the snake is at its target length then take the end part off 
 		{
 			snake.pop_back();
 		}
-		snake.front().symbol = BODY;
-		snake.push_front({ snake.front().x + dx, snake.front().y + dy, SPOT });
+		snake.front().symbol = BODY; //give the old head the symbol of a body
+		snake.push_front({ snake.front().x + dx, snake.front().y + dy, SPOT }); //add a new head on the next coordinates
 
 	}
 	void placeSnake(char g[][SIZEX]) //render the snake
 	{
 		for (int i = 0; i < snake.size(); i++)
 		{
-			g[snake.at(i).y][snake.at(i).x] = snake.at(i).symbol;
+			g[snake.at(i).y][snake.at(i).x] = snake.at(i).symbol; //place each part of the snake individually
 		}
 	}
-	void setTo4(int& target) {
+	void setTo4(int& target) { //reset the snake to original size
 		target = 4;
 		while (snake.size() != target) {
-			snake.pop_back();
+			snake.pop_back(); //take the back item off until it is the original size
 		}
 	}
 	Item getHead()
@@ -92,7 +88,7 @@ int main()
 	Snake spot;							//Initialise new snake class
 	//Item spot = { 0, 0, SPOT }; 		//spot's position and symbol
 	Item mouse = { 0, 0, MOUSE };			//mouse position and symbol
-	Item power = { 0, 0, TUNNEL };
+	Item power = { 1, 1, TUNNEL };
 	string stringScore, stringMouse, message("LET'S START...");	//current message to player
 	int score(0), mouseCount(0), target(4);
 	bool gameOver(false), win(false), cheat(false);
@@ -154,7 +150,7 @@ void updateGameData(const char g[][SIZEX], Snake & spot, const int key, string &
 		break;
 	case WALL:  		//hit a wall and stay there
 	case BODY:
-		gameOver = true;
+		gameOver = true; //end the game
 		break;
 	case MOUSE:
 		newMouse(mouse, g);
@@ -162,7 +158,7 @@ void updateGameData(const char g[][SIZEX], Snake & spot, const int key, string &
 		if (mouseCount % 2 == 0)
 		{
 			power.symbol = POWER;
-			newMouse(power, g);
+			newMouse(power, g);	//place the power pill in the grid if 
 		}
 		if (!cheat)
 		{
