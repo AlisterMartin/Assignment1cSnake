@@ -112,7 +112,7 @@ int main()
 	initialiseGame(grid, maze, spot, mouse, power);	//initialise grid (incl. walls and spot)
 	int key;//current key selected by player
 	makeString(score, mouseCount, stringScore, stringMouse);
-	renderGame(grid, message, stringScore, stringMouse);//display game info, modified grid and messages
+	renderGame(grid, message, stringScore, stringMouse, highScore);//display game info, modified grid and messages
 	key = toupper(getKeyPress());
 	do {
 		Sleep(delay);
@@ -149,7 +149,7 @@ int main()
 			message = "INVALID KEY!";  //set 'Invalid key' message
 		mouseCount == 7 ? win = true : win = false;
 		makeString(score, mouseCount, stringScore, stringMouse);
-		renderGame(grid, message, stringScore, stringMouse);//display game info, modified grid and messages
+		renderGame(grid, message, stringScore, stringMouse, highScore);//display game info, modified grid and messages
 	} while (!wantsToQuit(key) && !gameOver && !win);		//while user does not want to quit
 	makeString(score, mouseCount, stringScore, stringMouse);
 	renderGame(grid, message, stringScore, stringMouse, highScore);			//display game info, modified grid and messages
