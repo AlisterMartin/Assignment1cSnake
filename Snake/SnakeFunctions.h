@@ -98,3 +98,17 @@ void renderGame(const char g[][SIZEX], const string& mess, const string& score, 
 void makeString(const int& score, const int& mice, string& stringScore, string& stringMouse);
 
 void endProgram(const bool& gameOver, const bool& win);
+
+//---------------------------------------------------------------------------
+//----- process file
+//---------------------------------------------------------------------------
+
+void initilizeFile(const string& name);
+
+inline bool doesItExist(const string& name);
+
+string HighScore(const string& name);
+
+void writeToFile(const int& score, const string& name);
+
+string getName();

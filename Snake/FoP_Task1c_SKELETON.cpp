@@ -18,6 +18,9 @@
 #include <string>
 #include <sstream>
 #include <deque>
+#include <fstream>
+#include <vector>
+
 using namespace std;
 
 //include our own libraries
@@ -85,6 +88,7 @@ int main()
 	//local variable declarations 
 	char grid[SIZEY][SIZEX];			//grid for display
 	char maze[SIZEY][SIZEX];			//structure of the maze
+	string name;                        //name of the player
 	Snake spot;							//Initialise new snake class
 	//Item spot = { 0, 0, SPOT }; 		//spot's position and symbol
 	Item mouse = { 0, 0, MOUSE };			//mouse position and symbol
@@ -92,6 +96,9 @@ int main()
 	string stringScore, stringMouse, message("LET'S START...");	//current message to player
 	int score(0), mouseCount(0), target(4);
 	bool gameOver(false), win(false), cheat(false);
+
+	//initlizing game
+	name = getName();
 
 	//action...
 	seed();								//seed the random number generator
@@ -403,4 +410,75 @@ void setKeyDirection(const int key, int& dx, int& dy)
 		dy = +1;
 		break;
 	}
+}
+
+string HighScore(const string& name) {
+	string highScore;
+	string temp;
+	ifstream output;
+	string fileName = name + ".txt";
+	output.open(fileName, ios::app);
+
+	getline(output, temp);
+	highScore = temp;
+	output.close();
+
+	return highScore;
+}
+
+void writeToFile(const int& score, const string& name) {
+	ifstream input;
+
+	string currentHS;
+	string fileName = name + ".txt";
+	input.open(fileName, ios::in);
+
+	string strScore = to_string(score);
+	int n = fileName.length();
+	char char_fileName[21];
+	strcpy_s(char_fileName, fileName.c_str());
+
+	getline(input, currentHS);
+	input.close();
+
+	ofstream output;
+
+	if (currentHS < strScore) {
+		output.open(fileName, ios::out);
+		output << strScore << endl;
+		output.close();
+	}
+}
+
+void initilizeFile(const string& name) {
+	ofstream output;
+	string fileName = name + ".txt";
+	output.open(fileName, ios::app);
+	output << 500 << "\r\n";
+	output.close();
+}
+
+inline bool doesItExist(const string& name) {
+	ifstream input;
+	string fileName = name + ".txt";
+	input.open(fileName, ios::in);
+	return !input.fail();
+}
+
+string getName() {
+	string name;
+
+	showMessage(clRed, clYellow, 22, 10, "Enter your name <MAX 20 Charcters>: ");
+	gotoxy(40, 11);
+	cin >> name;
+	while (name.length() > 20)
+	{
+		cout << "Enter your name <MAX 20 Charcters>: ";
+		cin >> name;
+	}
+	selectBackColour(clBlack);
+	clrscr();
+	//system("CLS");
+
+	return name;
 }
