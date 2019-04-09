@@ -93,7 +93,7 @@ int main()
 	string stringScore, stringMouse, message("LET'S START...");	//current message to player
 	int score(0), mouseCount(0), target(4), delay(400), temp_delay(delay);
 	bool gameOver(false), win(false), cheat(false), speed(false);
-
+	bool hasCheated(false);
 	//initilize game
 	name = getName();
 
@@ -123,6 +123,7 @@ int main()
 			showMessage(clBlack, clBlack, 40, 15, "                                                           ");
 		}
 		else if (key == 'c'|| key =='C') {
+			hasCheated = true;
 			if (!cheat) {
 				showMessage(clDarkYellow, clBlack, 40, 15, "Cheat Mode Enabled!");
 				cout << "\a\a\a";
@@ -156,8 +157,9 @@ int main()
 	endProgram(gameOver, win);						//display final message
 
 	//update file
-	writeToFile(score, name);
-
+	if (!hasCheated) {
+		writeToFile(score, name);
+	}
 	return 0;
 }
 
@@ -469,7 +471,7 @@ void writeToFile(const int& score, const string& name) {
 
 	ofstream output;
 
-	if (currentHS < strScore) {
+	if (stoi(currentHS) < score) {
 		output.open(fileName, ios::out);
 		output << strScore << endl;
 		output.close();

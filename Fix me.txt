@@ -1,0 +1,5 @@
+add player name 
+fix it so drug disapears after a set amount of moves
+
+
+- cheat in advanced mode needs fixing 
