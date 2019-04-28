@@ -34,6 +34,11 @@ struct Item {
 	char symbol;
 };
 
+struct goBundle {
+	bool gameOver;
+	string message;
+};
+
 class Snake {
 	/*This is the snake class, it uses a deque which is a double ended queue which allows
 	me to add to the front of the snake and take from the back to allow it to move easier.*/
@@ -88,11 +93,14 @@ int main()
 	string highScore;
 	Snake spot;							//Initialise new snake class
 	//Item spot = { 0, 0, SPOT }; 		//spot's position and symbol
-	Item mouse = { 0, 0, MOUSE };			//mouse position and symbol
+	Item mouse = { 0, 0, MOUSE };		//mouse position and symbol
 	Item power = { 1, 1, TUNNEL };
+	Item M1 = { 0, 0, WALL};	//mongooses - start as wall to hide till the need displaying
+	Item M2 = { 0, 0, WALL };
 	string stringScore, stringMouse, message("LET'S START...");	//current message to player
+	goBundle go = { false, " " };	//contains messgae for game end and bool
 	int score(0), mouseCount(0), target(4), delay(400), temp_delay(delay), inv(0), ptimer(0);
-	bool gameOver(false), win(false), cheat(false), speed(false);
+	bool cheat(false), speed(false);
 	bool hasCheated(false);
 	//initilize game
 	name = getName();
@@ -109,7 +117,7 @@ int main()
 	//action...
 	seed();								//seed the random number generator
 	SetConsoleTitle("FoP 2018-19 - Task 1c - Game Skeleton");
-	initialiseGame(grid, maze, spot, mouse, power);	//initialise grid (incl. walls and spot)
+	initialiseGame(grid, maze, spot, mouse, power, M1, M2);	//initialise grid (incl. walls and spot)
 	int key, temp_key;//current key selected by player
 	makeString(score, mouseCount, stringScore, stringMouse);
 	renderGame(grid, message, stringScore, stringMouse, highScore, inv);//display game info, modified grid and messages
@@ -121,7 +129,7 @@ int main()
 		if (kbhit())
 			key = toupper(getKeyPress());//read in  selected key: arrow or letter command
 		if (isArrowKey(key)) {
-			updateGame(grid, maze, spot, key, message, score, mouse, target, mouseCount, gameOver, cheat, power, delay, inv, ptimer);
+			updateGame(grid, maze, spot, key, message, score, mouse, target, mouseCount, go, cheat, power, delay, inv, ptimer, M1, M2);
 			temp_key = key;
 			showMessage(clBlack, clBlack, 40, 15, "                                                           ");
 		}
@@ -153,13 +161,16 @@ int main()
 		}
 		else
 			message = "INVALID KEY!";  //set 'Invalid key' message
-		mouseCount == 7 ? win = true : win = false;
+		if (mouseCount == 7) {
+			go.gameOver = true;
+			go.message = "YOU GOT ALL TEH MICE! YOU WIN!";
+		}
 		makeString(score, mouseCount, stringScore, stringMouse);
 		renderGame(grid, message, stringScore, stringMouse, highScore, inv);//display game info, modified grid and messages
-	} while (!wantsToQuit(key) && !gameOver && !win);		//while user does not want to quit
+	} while (!wantsToQuit(key) && !go.gameOver);		//while user does not want to quit
 	makeString(score, mouseCount, stringScore, stringMouse);
 	renderGame(grid, message, stringScore, stringMouse, highScore, inv);			//display game info, modified grid and messages
-	endProgram(gameOver, win);						//display final message
+	endProgram(go);						//display final message
 
 	//update file
 	if (!hasCheated) {
@@ -168,7 +179,7 @@ int main()
 	return 0;
 }
 
-void updateGameData(const char g[][SIZEX], Snake & spot, const int key, string & mess, int & score, Item & mouse, int & target, int & mouseCount, bool & gameOver, const bool& cheat, Item& power, int& delay, int& inv, int& ptimer)
+void updateGameData(const char g[][SIZEX], Snake & spot, const int key, string & mess, int & score, Item & mouse, int & target, int & mouseCount, goBundle& go, const bool& cheat, Item& power, int& delay, int& inv, int& ptimer, Item& M1, Item& M2)
 { //move spot in required direction
 	assert(isArrowKey(key));
 
@@ -187,9 +198,25 @@ void updateGameData(const char g[][SIZEX], Snake & spot, const int key, string &
 		score++;
 		break;
 	case WALL:  		//hit a wall and stay there
-    inv > 0 ? spot.moveSnake(-(12 * dx), -(10 * dy), target) : gameOver = true;
+		if (inv > 0) {
+			spot.moveSnake(-(12 * dx), -(10 * dy), target);
+		}
+		else {
+			go.gameOver = true;
+			go.message = "YOU HIT A WALL! YOU LOSE!";
+		}
+		break;
+	case MONGOOSE: 
+		if (inv <= 0) {
+			go.gameOver = true; //end the game
+			go.message = "YOU GOT EATEN! YOU LOSE!";
+		}
+		break;
 	case BODY:
-    inv > 0 ? gameOver = false : gameOver = true; //end the game
+		if (inv <= 0) {
+			go.gameOver = true; //end the game
+			go.message = "YOU RAN INTO YOUR SELF! YOU LOSE!";
+		}
 		break;
 	case MOUSE:
 		newMouse(mouse, g);
@@ -197,7 +224,7 @@ void updateGameData(const char g[][SIZEX], Snake & spot, const int key, string &
 		if (mouseCount % 2 == 0)
 		{
 			power.symbol = POWER;
-      ptimer = 15;
+			ptimer = 15;
 			newMouse(power, g);	//place the power pill in the grid if 
 		}
 		if (!cheat)
@@ -207,6 +234,16 @@ void updateGameData(const char g[][SIZEX], Snake & spot, const int key, string &
 		score += 10;
 		spot.moveSnake(dx, dy, target);
 		mouseCount % 2 == 0 && delay !=100 ? delay -= 100 : delay; //speeds up snake every two mice 
+		if (mouseCount % 3 == 0) {
+			if (mouseCount % 6 == 0) {
+				M2.symbol = MONGOOSE;
+				newMouse(M2, g);
+			}
+			else {
+				M1.symbol = MONGOOSE;
+				newMouse(M1, g);
+			}
+		}
 		break;
 	case POWER:
     inv = 20;
@@ -229,30 +266,80 @@ void placeMaze(char grid[][SIZEX], const char maze[][SIZEX])
 			grid[row][col] = maze[row][col];
 }
 
-void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], Snake & spot, const Item & mouse, const Item & power)
+void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], Snake & spot, const Item & mouse, const Item & power, const Item& M1, const Item& M2)
 { //update grid configuration after each move
 	placeMaze(grid, maze);	//reset the empty maze configuration into grid
 	placeItem(grid, power);						
 	//placeItem(grid, spot);	//set spot in grid
 	spot.placeSnake(grid);
 	placeItem(grid, mouse); //set mouse in grid
+	placeItem(grid, M1);
+	placeItem(grid, M2);
 	
 
 }
 
-void updateGame(char grid[][SIZEX], const char maze[][SIZEX], Snake & spot, const int keyCode, string & mess, int & score, Item & mouse, int & target, int & mouseCount, bool & gameOver,const bool& cheat, Item& power, int& delay, int& inv, int& ptimer)
+void updateGame(char grid[][SIZEX], const char maze[][SIZEX], Snake & spot, const int keyCode, string & mess, int & score, Item & mouse, int & target, int & mouseCount, goBundle& go,const bool& cheat, Item& power, int& delay, int& inv, int& ptimer, Item& M1, Item& M2)
 { //update game
-	updateGameData(grid, spot, keyCode, mess, score, mouse, target, mouseCount, gameOver, cheat, power, delay, inv, ptimer);		//move spot in required direction
-	updateGrid(grid, maze, spot, mouse, power);					//update grid information
+	moveMongoose(grid, M1, go);	//moves mongees if needed
+	moveMongoose(grid, M2, go);
+	updateGameData(grid, spot, keyCode, mess, score, mouse, target, mouseCount, go, cheat, power, delay, inv, ptimer, M1, M2);		//move spot in required direction
+	updateGrid(grid, maze, spot, mouse, power, M1, M2);					//update grid information
 }
 
-void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], Snake & spot, Item & mouse, Item & power)
+void moveMongoose(const char g[][SIZEX],Item& M,goBundle& go) {
+	if (M.symbol != TUNNEL) {
+		int D1 = random(5);
+		switch (D1) {
+		case 1:
+			if (g[M.y][M.x + 1] == TUNNEL)
+				M.x++;
+			else if (g[M.y][M.x + 1] == SPOT) {
+				go.gameOver = true;
+				go.message = "YOU GOT EATEN! GAME OVER!";
+				M.x++;
+			}
+			break;
+		case 2:
+			if (g[M.y][M.x - 1] == TUNNEL)
+				M.x--;
+			else if (g[M.y][M.x - 1] == SPOT) {
+				go.gameOver = true;
+				go.message = "YOU GOT EATEN! GAME OVER!";
+				M.x--;
+			}
+			break;
+		case 3:
+			if (g[M.y + 1][M.x] == TUNNEL)
+				M.y++;
+			else if (g[M.y + 1][M.x] == SPOT) {
+				go.gameOver = true;
+				go.message = "YOU GOT EATEN! GAME OVER!";
+				M.y++;
+			}
+			break;
+		case 4:
+			if (g[M.y - 1][M.x] == TUNNEL)
+				M.y--;
+			else if (g[M.y - 1][M.x] == SPOT) {
+				go.gameOver = true;
+				go.message = "YOU GOT EATEN! GAME OVER!";
+				M.y--;
+			}
+			break;
+		case 5:
+			break; //not move
+		}
+	}
+}
+
+void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], Snake & spot, Item & mouse, Item & power, const Item& M1, const Item& M2)
 { //initialise grid and place spot in middle
 	setInitialMazeStructure(maze);		   //initialise maze
 	spot.initSnake(maze);
 	//setSpotInitialCoordinates(spot, maze); //sets spots posititon
 	newMouse(mouse, maze);				   //sets mouses position
-	updateGrid(grid, maze, spot, mouse, power);		   //prepare grid
+	updateGrid(grid, maze, spot, mouse, power, M1, M2);		   //prepare grid
 }
 
 int getKeyPress()
@@ -331,25 +418,11 @@ void makeString(const int & score, const int & mice, string& stringScore, string
 	sout.str("");
 }
 
-void endProgram(const bool & gameOver, const bool & win)
+void endProgram(const goBundle& go)
 {
-
-	if (gameOver)
-	{
-		clrscr();
-		showMessage(clRed, clYellow, 36, 10, "Game Over");
-	}
-	else if (win)
-	{
-		clrscr();
-		showMessage(clGreen, clBlue, 37, 10, "You Win");
-	}
-	else
-	{
-		clrscr();
-		showMessage(clRed, clYellow, 38, 10, "BYE!");
-	}
-	gotoxy(24, 12);
+	clrscr();
+	showMessage(clRed, clYellow, 36, 10, go.message);
+	gotoxy(36, 12);
 	system("pause");	//hold output screen until a keyboard key is hit
 }
 

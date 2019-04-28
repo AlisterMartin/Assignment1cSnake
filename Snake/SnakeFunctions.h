@@ -32,6 +32,7 @@ const char TUNNEL(' ');    	//tunnel
 const char WALL('#');    	//border
 const char MOUSE('M');		//mouse
 const char POWER('+');		//power pill
+const char MONGOOSE('U');	//mongoose
 //defining the command letters to move the spot on the maze
 const int  UP(72);			//up arrow
 const int  DOWN(80); 		//down arrow
@@ -41,6 +42,7 @@ const int  LEFT(75);		//left arrow
 const char QUIT('Q');		//to end the game
 
 struct Item;
+struct goBundle;
 
 class Snake;
 
@@ -64,17 +66,19 @@ void setKeyDirection(const int key, int& dx, int& dy);
 //----- Update Game
 //---------------------------------------------------------------------------
 
-void updateGameData(const char g[][SIZEX], Snake& spot, const int key, string& mess, int& score, Item& mouse, int& target, int& mouseCount, bool& gameOver, const bool& cheat, Item& power, int& delay, int& inv, int& ptimer);
+void updateGameData(const char g[][SIZEX], Snake& spot, const int key, string& mess, int& score, Item& mouse, int& target, int& mouseCount, goBundle& go, const bool& cheat, Item& power, int& delay, int& inv, int& ptimer, Item& M1, Item& M2);
 
 void placeItem(char g[][SIZEX], const Item& item);
 
 void placeMaze(char grid[][SIZEX], const char maze[][SIZEX]);
 
-void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], Snake& spot, const Item& mouse, const Item& power);
+void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], Snake& spot, const Item& mouse, const Item& power, const Item& M1, const Item& M2);
 
-void updateGame(char grid[][SIZEX], const char maze[][SIZEX], Snake& spot, const int keyCode, string& mess, int& score, Item& mouse, int& target, int& mouseCount, bool& gameOver, const bool& cheat, Item& power, int& delay, int& inv, int& ptimer);
+void updateGame(char grid[][SIZEX], const char maze[][SIZEX], Snake& spot, const int keyCode, string& mess, int& score, Item& mouse, int& target, int& mouseCount, goBundle& gameOver, const bool& cheat, Item& power, int& delay, int& inv, int& ptimer, Item& M1, Item& M2);
 
-void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], Snake& spot, Item& mouse, Item& power);
+void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], Snake& spot, Item& mouse, Item& power, const Item& M1, const Item& M2);
+
+void moveMongoose(const char g[][SIZEX],Item& M, goBundle& gameOver);
 
 
 
@@ -97,7 +101,7 @@ void renderGame(const char g[][SIZEX], const string& mess, const string& score, 
 
 void makeString(const int& score, const int& mice, string& stringScore, string& stringMouse);
 
-void endProgram(const bool& gameOver, const bool& win);
+void endProgram(const goBundle& go);
 
 //---------------------------------------------------------------------------
 //----- process file
