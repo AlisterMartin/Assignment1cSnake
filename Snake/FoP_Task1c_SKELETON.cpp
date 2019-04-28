@@ -110,7 +110,7 @@ int main()
 	seed();								//seed the random number generator
 	SetConsoleTitle("FoP 2018-19 - Task 1c - Game Skeleton");
 	initialiseGame(grid, maze, spot, mouse, power);	//initialise grid (incl. walls and spot)
-	int key;//current key selected by player
+	int key, temp_key;//current key selected by player
 	makeString(score, mouseCount, stringScore, stringMouse);
 	renderGame(grid, message, stringScore, stringMouse, highScore, inv);//display game info, modified grid and messages
 	key = toupper(getKeyPress());
@@ -122,10 +122,12 @@ int main()
 			key = toupper(getKeyPress());//read in  selected key: arrow or letter command
 		if (isArrowKey(key)) {
 			updateGame(grid, maze, spot, key, message, score, mouse, target, mouseCount, gameOver, cheat, power, delay, inv, ptimer);
+			temp_key = key;
 			showMessage(clBlack, clBlack, 40, 15, "                                                           ");
 		}
 		else if (key == 'c'|| key =='C') {
 			hasCheated = true;
+			key = temp_key;
 			if (!cheat) {
 				showMessage(clDarkYellow, clBlack, 40, 15, "Cheat Mode Enabled!");
 				cout << "\a\a\a";
@@ -138,15 +140,16 @@ int main()
 			}
 		}
 		else if (key == 'Z') {
-				if (!speed) {
-					temp_delay = delay;
-					delay = 400;
-					speed = true;
-				}
-				else {
-					delay = temp_delay;
-					speed = false;
-				}
+			key = temp_key;
+			if (!speed) {
+				temp_delay = delay;
+				delay = 400;
+				speed = true;
+			}
+			else {
+				delay = temp_delay;
+				speed = false;
+			}
 		}
 		else
 			message = "INVALID KEY!";  //set 'Invalid key' message
@@ -356,19 +359,25 @@ void paintGrid(const char g[][SIZEX], const int& inv)
 { //display grid content on screen
 	selectBackColour(clBlack);
 	gotoxy(0, 2);
-
+	int colour = 1;
 	for (int row(0); row < SIZEY; ++row)
 	{
 		for (int col(0); col < SIZEX; ++col) {
-			if (g[row][col] != SPOT && (g[row][col] == BODY ? inv > 0 ? false : true : true)) {
-				selectTextColour(clWhite);
+			if (g[row][col] == SPOT || g[row][col] == BODY) {
+				inv > 0 ? selectTextColour(11) : selectTextColour(colour);
 			}
 			else {
-				selectTextColour(clGreen);
+				selectTextColour(colour);
 			}
 			cout << g[row][col];	//output cell content
+			colour++;
+			if (colour > 15)
+				colour = 1;
 		}
 		cout << endl;
+		colour++;
+		if (colour > 15)
+			colour = 1;
 	}
 }
 
