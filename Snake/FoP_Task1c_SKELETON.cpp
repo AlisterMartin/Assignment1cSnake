@@ -91,7 +91,7 @@ int main()
 	Item mouse = { 0, 0, MOUSE };			//mouse position and symbol
 	Item power = { 1, 1, TUNNEL };
 	string stringScore, stringMouse, message("LET'S START...");	//current message to player
-	int score(0), mouseCount(0), target(4), delay(400), temp_delay(delay);
+	int score(0), mouseCount(0), target(4), delay(400), temp_delay(delay), inv(0), ptimer(0);
 	bool gameOver(false), win(false), cheat(false), speed(false);
 	bool hasCheated(false);
 	//initilize game
@@ -112,14 +112,16 @@ int main()
 	initialiseGame(grid, maze, spot, mouse, power);	//initialise grid (incl. walls and spot)
 	int key;//current key selected by player
 	makeString(score, mouseCount, stringScore, stringMouse);
-	renderGame(grid, message, stringScore, stringMouse, highScore);//display game info, modified grid and messages
+	renderGame(grid, message, stringScore, stringMouse, highScore, inv);//display game info, modified grid and messages
 	key = toupper(getKeyPress());
 	do {
 		Sleep(delay);
+    inv > 0 ? inv-- : inv = 0;
+    ptimer > 0 ? ptimer-- : power.symbol = TUNNEL;
 		if (kbhit())
 			key = toupper(getKeyPress());//read in  selected key: arrow or letter command
 		if (isArrowKey(key)) {
-			updateGame(grid, maze, spot, key, message, score, mouse, target, mouseCount, gameOver, cheat, power, delay);
+			updateGame(grid, maze, spot, key, message, score, mouse, target, mouseCount, gameOver, cheat, power, delay, inv, ptimer);
 			showMessage(clBlack, clBlack, 40, 15, "                                                           ");
 		}
 		else if (key == 'c'|| key =='C') {
@@ -150,10 +152,10 @@ int main()
 			message = "INVALID KEY!";  //set 'Invalid key' message
 		mouseCount == 7 ? win = true : win = false;
 		makeString(score, mouseCount, stringScore, stringMouse);
-		renderGame(grid, message, stringScore, stringMouse, highScore);//display game info, modified grid and messages
+		renderGame(grid, message, stringScore, stringMouse, highScore, inv);//display game info, modified grid and messages
 	} while (!wantsToQuit(key) && !gameOver && !win);		//while user does not want to quit
 	makeString(score, mouseCount, stringScore, stringMouse);
-	renderGame(grid, message, stringScore, stringMouse, highScore);			//display game info, modified grid and messages
+	renderGame(grid, message, stringScore, stringMouse, highScore, inv);			//display game info, modified grid and messages
 	endProgram(gameOver, win);						//display final message
 
 	//update file
@@ -163,7 +165,7 @@ int main()
 	return 0;
 }
 
-void updateGameData(const char g[][SIZEX], Snake & spot, const int key, string & mess, int & score, Item & mouse, int & target, int & mouseCount, bool & gameOver, const bool& cheat, Item& power, int& delay)
+void updateGameData(const char g[][SIZEX], Snake & spot, const int key, string & mess, int & score, Item & mouse, int & target, int & mouseCount, bool & gameOver, const bool& cheat, Item& power, int& delay, int& inv, int& ptimer)
 { //move spot in required direction
 	assert(isArrowKey(key));
 
@@ -182,8 +184,9 @@ void updateGameData(const char g[][SIZEX], Snake & spot, const int key, string &
 		score++;
 		break;
 	case WALL:  		//hit a wall and stay there
+    inv > 0 ? spot.moveSnake(-(12 * dx), -(10 * dy), target) : gameOver = true;
 	case BODY:
-		gameOver = true; //end the game
+    inv > 0 ? gameOver = false : gameOver = true; //end the game
 		break;
 	case MOUSE:
 		newMouse(mouse, g);
@@ -191,6 +194,7 @@ void updateGameData(const char g[][SIZEX], Snake & spot, const int key, string &
 		if (mouseCount % 2 == 0)
 		{
 			power.symbol = POWER;
+      ptimer = 15;
 			newMouse(power, g);	//place the power pill in the grid if 
 		}
 		if (!cheat)
@@ -202,9 +206,10 @@ void updateGameData(const char g[][SIZEX], Snake & spot, const int key, string &
 		mouseCount % 2 == 0 && delay !=100 ? delay -= 100 : delay; //speeds up snake every two mice 
 		break;
 	case POWER:
-		power.symbol = TUNNEL;
+    inv = 20;
 		spot.setTo4(target);
 		spot.moveSnake(dx, dy, target);
+    ptimer = 0;
 		break;
 	}
 }
@@ -232,9 +237,9 @@ void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], Snake & spot, cons
 
 }
 
-void updateGame(char grid[][SIZEX], const char maze[][SIZEX], Snake & spot, const int keyCode, string & mess, int & score, Item & mouse, int & target, int & mouseCount, bool & gameOver,const bool& cheat, Item& power, int& delay)
+void updateGame(char grid[][SIZEX], const char maze[][SIZEX], Snake & spot, const int keyCode, string & mess, int & score, Item & mouse, int & target, int & mouseCount, bool & gameOver,const bool& cheat, Item& power, int& delay, int& inv, int& ptimer)
 { //update game
-	updateGameData(grid, spot, keyCode, mess, score, mouse, target, mouseCount, gameOver, cheat, power, delay);		//move spot in required direction
+	updateGameData(grid, spot, keyCode, mess, score, mouse, target, mouseCount, gameOver, cheat, power, delay, inv, ptimer);		//move spot in required direction
 	updateGrid(grid, maze, spot, mouse, power);					//update grid information
 }
 
@@ -285,7 +290,7 @@ void showMessage(const WORD backColour, const WORD textColour, int x, int y, con
 	cout << message /*+ string(40 - message.length(), ' ')*/;
 }
 
-void renderGame(const char g[][SIZEX], const string & mess, const string & score, const string & mouseCount, const string& highScore)
+void renderGame(const char g[][SIZEX], const string & mess, const string & score, const string & mouseCount, const string& highScore, const int& inv)
 { //display game title, messages, maze, spot and other items on screen
   //display game title
 	showMessage(clDarkCyan, clMagenta, 0, 0, "___GAME___");
@@ -303,14 +308,16 @@ void renderGame(const char g[][SIZEX], const string & mess, const string & score
 	showMessage(clBlack, clWhite, 40, 9, "Current High Score: " + highScore);
 	showMessage(clBlack, clWhite, 40, 10, score);
 	showMessage(clBlack, clWhite, 40, 11, mouseCount);
+  inv > 0 ? showMessage(clBlack, clWhite, 40, 12, "Invincible") : showMessage(clBlack, clWhite, 40, 12, "          ");
+
 
 	//display grid contents
-	paintGrid(g);
+	paintGrid(g, inv);
 }
 
 
-//creates two strings 1 for showing score the other for showing the ammount of mice collected
-void makeString(const int & score, const int & mice, string & stringScore, string & stringMouse) {
+//creates two strings 1 for showing score the other for showing the amount of mice collected
+void makeString(const int & score, const int & mice, string& stringScore, string& stringMouse) {
 	ostringstream sout;
 	istringstream sin;
 	sout << "Score:" << score;
@@ -345,7 +352,7 @@ void endProgram(const bool & gameOver, const bool & win)
 
 
 
-void paintGrid(const char g[][SIZEX])
+void paintGrid(const char g[][SIZEX], const int& inv)
 { //display grid content on screen
 	selectBackColour(clBlack);
 	gotoxy(0, 2);
@@ -353,8 +360,7 @@ void paintGrid(const char g[][SIZEX])
 	for (int row(0); row < SIZEY; ++row)
 	{
 		for (int col(0); col < SIZEX; ++col) {
-			if (g[row][col] != '@') {
-
+			if (g[row][col] != SPOT && (g[row][col] == BODY ? inv > 0 ? false : true : true)) {
 				selectTextColour(clWhite);
 			}
 			else {
