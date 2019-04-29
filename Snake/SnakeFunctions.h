@@ -113,8 +113,14 @@ inline bool doesItExist(const string& name);
 
 string HighScore(const string& name);
 
-void writeToFile(const int& score, const string& name);
+void writeToFile(const int& score, const string& name, const int& level);
 
 string getName();
 
 string getHighScore(const string& name);
+
+int getAvailableLevel(const string& name);
+
+int selectInitialLevel(const string& name);
+
+int selectLevel(const string& name);

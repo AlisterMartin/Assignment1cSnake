@@ -39,6 +39,7 @@ struct goBundle {
 	string message;
 };
 
+
 class Snake {
 	/*This is the snake class, it uses a deque which is a double ended queue which allows
 	me to add to the front of the snake and take from the back to allow it to move easier.*/
@@ -94,14 +95,15 @@ int main()
 	int startTime;
 	int currentTime;
 	int countdownTimer;
-	int countdownTime = 10;
+	int countdownTime = 10;				//to be set by reading level files
 	bool moved = false;
 	bool timeInitilized = false;
+	int currentLevel = 1;				//to be set by reading indiviual files
 	Snake spot;							//Initialise new snake class
 	//Item spot = { 0, 0, SPOT }; 		//spot's position and symbol
 	Item mouse = { 0, 0, MOUSE };		//mouse position and symbol
 	Item power = { 1, 1, TUNNEL };
-	Item M1 = { 0, 0, WALL};	//mongooses - start as wall to hide till the need displaying
+	Item M1 = { 0, 0, WALL };	//mongooses - start as wall to hide till the need displaying
 	Item M2 = { 0, 0, WALL };
 	string stringScore, stringMouse, message("LET'S START...");	//current message to player
 	goBundle go = { false, " " };	//contains messgae for game end and bool
@@ -110,88 +112,104 @@ int main()
 	bool hasCheated(false);
 	//initilize game
 	name = getName();
-
 	//initilize file if it does not exist
 	if (!doesItExist(name)) {
 		initilizeFile(name);
 		highScore = "500";
 	}
-	else 
+	else
 	{
 		highScore = getHighScore(name);
 	}
-	//action...
-	seed();								//seed the random number generator
-	SetConsoleTitle("FoP 2018-19 - Task 1c - Game Skeleton");
-	initialiseGame(grid, maze, spot, mouse, power, M1, M2);	//initialise grid (incl. walls and spot)
-	int key, temp_key;//current key selected by player
-	makeString(score, mouseCount, stringScore, stringMouse);
-	renderGame(grid, message, stringScore, stringMouse, highScore, inv, name, countdownTimer, timeInitilized, startTime, countdownTime, go);//display game info, modified grid and messages
-	key = toupper(getKeyPress());
-	do {
-		Sleep(delay);
-    inv > 0 ? inv-- : inv = 0;
-    ptimer > 0 ? ptimer-- : power.symbol = TUNNEL;
-		if (kbhit())
-			key = toupper(getKeyPress());//read in  selected key: arrow or letter command
-		if (isArrowKey(key)) {
-			moved = true;
-			updateGame(grid, maze, spot, key, message, score, mouse, target, mouseCount, go, cheat, power, delay, inv, ptimer, M1, M2, countdownTimer);
-			temp_key = key;
-			showMessage(clBlack, clBlack, 40, 15, "                                                           ");
-		}
-		else if (key == 'c'|| key =='C') {
-			hasCheated = true;
-			key = temp_key;
-			if (!cheat) {
-				showMessage(clDarkYellow, clBlack, 40, 15, "Cheat Mode Enabled!");
-				cout << "\a\a\a";
-				cheat = true;
-				spot.setTo4(target);
-			}
-			else {
-				showMessage(clDarkYellow, clBlack, 40, 15, "Cheat Mode Disabled!");
-				cheat = false;
-			}
-		}
-		else if (key == 'Z') {
-			key = temp_key;
-			if (!speed) {
-				temp_delay = delay;
-				delay = 400;
-				speed = true;
-			}
-			else {
-				delay = temp_delay;
-				speed = false;
-			}
-		}
-		else
-			message = "INVALID KEY!";  //set 'Invalid key' message
-		if (mouseCount == 7) {
-			win = true;
-			go.gameOver = true;
-			go.message = "YOU GOT ALL TEH MICE! YOU WIN! Remaining time: " + to_string(countdownTimer);
-		}
-		makeString(score, mouseCount, stringScore, stringMouse);
-		if (moved && !timeInitilized) {
-			startTime = getIntTime();
-			timeInitilized = true;
-		}
-		renderGame(grid, message, stringScore, stringMouse, highScore, inv, name, countdownTimer, timeInitilized, startTime, countdownTime, go);//display game info, modified grid and messages
-		if (countdownTimer < 0) { 
-			go.gameOver = true;
-			go.message = "YOU RAN OUT OF TIME!";
-		}
-	} while (!wantsToQuit(key) && !go.gameOver);		//while user does not want to quit
-	makeString(score, mouseCount, stringScore, stringMouse);
-	renderGame(grid, message, stringScore, stringMouse, highScore, inv, name, countdownTimer, timeInitilized, startTime, countdownTime, go);			//display game info, modified grid and messages
-	endProgram(go);						//display final message
+	currentLevel = selectInitialLevel(name);
 
-	//update file
-	if (!hasCheated && win) {
-		writeToFile(score, name);
+	while (currentLevel != 9) {
+		clrscr();
+		//action...
+		seed();								//seed the random number generator
+		SetConsoleTitle("FoP 2018-19 - Task 1c - Game Skeleton");
+		initialiseGame(grid, maze, spot, mouse, power, M1, M2);	//initialise grid (incl. walls and spot)
+		int key, temp_key;//current key selected by player
+		makeString(score, mouseCount, stringScore, stringMouse);
+		renderGame(grid, message, stringScore, stringMouse, highScore, inv, name, countdownTimer, timeInitilized, startTime, countdownTime, go);//display game info, modified grid and messages
+		key = toupper(getKeyPress());
+		do {
+			Sleep(delay);
+			inv > 0 ? inv-- : inv = 0;
+			ptimer > 0 ? ptimer-- : power.symbol = TUNNEL;
+			if (kbhit())
+				key = toupper(getKeyPress());//read in  selected key: arrow or letter command
+			if (isArrowKey(key)) {
+				moved = true;
+				updateGame(grid, maze, spot, key, message, score, mouse, target, mouseCount, go, cheat, power, delay, inv, ptimer, M1, M2, countdownTimer);
+				temp_key = key;
+				showMessage(clBlack, clBlack, 40, 15, "                                                           ");
+			}
+			else if (key == 'c' || key == 'C') {
+				hasCheated = true;
+				key = temp_key;
+				if (!cheat) {
+					showMessage(clDarkYellow, clBlack, 40, 15, "Cheat Mode Enabled!");
+					cout << "\a\a\a";
+					cheat = true;
+					spot.setTo4(target);
+				}
+				else {
+					showMessage(clDarkYellow, clBlack, 40, 15, "Cheat Mode Disabled!");
+					cheat = false;
+				}
+			}
+			else if (key == 'Z') {
+				key = temp_key;
+				if (!speed) {
+					temp_delay = delay;
+					delay = 400;
+					speed = true;
+				}
+				else {
+					delay = temp_delay;
+					speed = false;
+				}
+			}
+			else
+				message = "INVALID KEY!";  //set 'Invalid key' message
+			if (mouseCount == 7) {
+				win = true;
+				go.gameOver = true;
+				go.message = "YOU GOT ALL TEH MICE! YOU WIN! Remaining time: " + to_string(countdownTimer);
+			}
+			makeString(score, mouseCount, stringScore, stringMouse);
+			if (moved && !timeInitilized) {
+				startTime = getIntTime();
+				timeInitilized = true;
+			}
+			renderGame(grid, message, stringScore, stringMouse, highScore, inv, name, countdownTimer, timeInitilized, startTime, countdownTime, go);//display game info, modified grid and messages
+			if (countdownTimer < 0) {
+				go.gameOver = true;
+				go.message = "YOU RAN OUT OF TIME!";
+			}
+		} while (!wantsToQuit(key) && !go.gameOver);		//while user does not want to quit
+		makeString(score, mouseCount, stringScore, stringMouse);
+		renderGame(grid, message, stringScore, stringMouse, highScore, inv, name, countdownTimer, timeInitilized, startTime, countdownTime, go);			//display game info, modified grid and messages
+
+		//update file
+		if (!hasCheated /*&& win*/) {
+			if (currentLevel == 3) {
+				go.message = "WELL DONE! You finished the game with score: " + tostring(score);
+			}
+			else
+			{
+				currentLevel += 1;
+				writeToFile(score, name, currentLevel);
+				currentLevel = selectLevel(name);
+				renderGame(grid, message, stringScore, stringMouse, highScore, inv, name, countdownTimer, timeInitilized, startTime, countdownTime, go);
+			}
+			writeToFile(score, name, currentLevel);
+
+			//reset all values
+		}
 	}
+	endProgram(go);						//display final message
 	return 0;
 }
 
@@ -457,7 +475,82 @@ void endProgram(const goBundle& go)
 	system("pause");	//hold output screen until a keyboard key is hit
 }
 
+int selectInitialLevel(const string& name) {
+	int maxLevel = getAvailableLevel(name);
+	int input = -1;
+	clrscr();
+	switch (maxLevel) {
+	case 1 :
+		showMessage(clRed, clYellow, 36, 10, "Welcome to the game, please press 1 to start");
+		gotoxy(36, 11);
+		cin >> input;
+		while (input != 1) {
+			showMessage(clRed, clYellow, 36, 9, "ERROR, please select the correct number");
+			cin >> input;
+		}
+		break;
+	case 2 :
+		showMessage(clRed, clYellow, 36, 9, "Welcome to the game, please select a level");
+		showMessage(clRed, clYellow, 36, 10, "Press 1 to play level 1 again");
+		showMessage(clRed, clYellow, 36, 11, "Press 2 to play level 2");
+		gotoxy(36, 12);
+		cin >> input;
+		while (input != 1 && input != 2) {
+			showMessage(clRed, clYellow, 36, 8, "ERROR, please select the correct number");
+			cin >> input;
+		}
+		break;
+	case 3 :
+		showMessage(clRed, clYellow, 36, 9, "Welcome to the game, please select a level");
+		showMessage(clRed, clYellow, 36, 10, "Press 1 to play level 1 again");
+		showMessage(clRed, clYellow, 36, 11, "Press 2 to play level 2 again");
+		showMessage(clRed, clYellow, 36, 12, "Press 3 to play level 3");
+		gotoxy(36, 13);
+		cin >> input;
+		while (input != 1 && input != 2 && input != 3) {
+			showMessage(clRed, clYellow, 36, 8, "ERROR, please select the correct number");
+			cin >> input;
+		}
+		break;
+	}
+	selectBackColour(clBlack);
+	return input;
+}
 
+int selectLevel(const string& name) {
+	int maxLevel = getAvailableLevel(name);
+	int input = -1;
+	clrscr();
+	switch(maxLevel) {
+	case 2 : 
+		showMessage(clRed, clYellow, 36, 9, "Level 1 completed");
+		showMessage(clRed, clYellow, 36, 10, "Press 1 to play level 1 again");
+		showMessage(clRed, clYellow, 36, 11, "Press 2 to play level 2");
+		showMessage(clRed, clYellow, 36, 12, "Press 9 to quit");
+		gotoxy(36, 13);
+		cin >> input;
+		while (input != 1 && input != 2 && input != 9) {
+			showMessage(clRed, clYellow, 36, 8, "ERROR, please select the correct number");
+			cin >> input;
+		}
+		break;
+	case 3 :
+		showMessage(clRed, clYellow, 36, 8, "Level 2 completed");
+		showMessage(clRed, clYellow, 36, 9, "Press 1 to play level 1");
+		showMessage(clRed, clYellow, 36, 10, "Press 2 to play level 2 again");
+		showMessage(clRed, clYellow, 36, 11, "Press 3 to play level 3");
+		showMessage(clRed, clYellow, 36, 12, "Press 9 to quit");
+		gotoxy(36, 13);
+		cin >> input;
+		while (input != 1 && input != 2 && input!= 3 && input != 9) {
+			showMessage(clRed, clYellow, 36, 7, "ERROR, please select the correct number");
+			cin >> input;
+		}
+		break;
+	}
+	selectBackColour(clBlack);
+	return input;
+}
 
 void paintGrid(const char g[][SIZEX], const int& inv)
 { //display grid content on screen
@@ -579,7 +672,7 @@ string HighScore(const string& name) {
 	return highScore;
 }
 
-void writeToFile(const int& score, const string& name) {
+void writeToFile(const int& score, const string& name, const int& level) {
 	ifstream input;
 
 	string currentHS;
@@ -594,8 +687,18 @@ void writeToFile(const int& score, const string& name) {
 	if (stoi(currentHS) < score) {
 		output.open(fileName, ios::out);
 		output << strScore << endl;
+		output << level;
 		output.close();
 	}
+	else
+	{
+		output.open(fileName, ios::out);
+		output << currentHS << endl;
+		output << level;
+		output.close();
+	}
+
+	
 }
 
 string getHighScore(const string& name) {
@@ -611,11 +714,26 @@ string getHighScore(const string& name) {
 	return score;
 }
 
+int getAvailableLevel(const string& name) {
+	ifstream input;
+	string level;
+	int intLevel;
+	string fileName = name + ".txt";
+	input.open(fileName, ios::in);
+	getline(input, level);
+	getline(input, level);
+	intLevel = stoi(level);
+	input.close();
+
+	return intLevel;
+}
+
 void initilizeFile(const string& name) {
 	ofstream output;
 	string fileName = name + ".txt";
 	output.open(fileName, ios::app);
-	output << 0 << "\r\n";
+	output << 0 << endl;
+	output << 1;
 	output.close();
 }
 
