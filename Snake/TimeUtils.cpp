@@ -24,11 +24,25 @@ const string timeToString(int h, int m, int s)
     return os.str();
 }
 
+// basically a int to string with 0 infront
+const string secondsToString(int time) {
+	string st = to_string(time);
+	return st;
+}
+
 const string getTime() 
 { //return the current time in a string format
 	int hrs, mins, secs;		//hold the current time
 	getSystemTime(hrs, mins, secs);
 	return timeToString(hrs, mins, secs);
+}
+
+const int getIntTime() { //return a time in seconds
+	int h, m, s;
+	getSystemTime(h, m, s);
+	h = h * 60 * 60;
+	m = m * 60;
+	return h + m + s;
 }
 
 void getSystemDate(int& day, int& month, int& year)

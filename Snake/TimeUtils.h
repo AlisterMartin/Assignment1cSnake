@@ -25,6 +25,12 @@ void getSystemTime(int& hrs, int& mins, int& secs);
 const string timeToString(int h, int m, int s); 
 //convert the time to a string in 24-h digital clock format (00:00:00)
 
+const string secondsToString(int time);
+//coverts time to a string of seconds
+
+const int getIntTime();
+//returns a time in seconds
+
 const string getTime() ; 
 //return the current time in a string format
 

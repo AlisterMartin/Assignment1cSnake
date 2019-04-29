@@ -23,16 +23,16 @@ using namespace std;
 //---------------------------------------------------------------------------
 
 //defining the size of the grid
-const int  SIZEX(15);    	//horizontal dimension
+const int  SIZEX(30);    	//horizontal dimension
 const int  SIZEY(13);		//vertical dimension
 //defining symbols used for display of the grid and content
-const char SPOT('@');   	//spot
+const char SPOT('0');   	//spot
 const char BODY('o');		//snake body
 const char TUNNEL(' ');    	//tunnel
 const char WALL('#');    	//border
-const char MOUSE('M');		//mouse
+const char MOUSE('@');		//mouse
 const char POWER('+');		//power pill
-const char MONGOOSE('U');	//mongoose
+const char MONGOOSE('M');	//mongoose
 //defining the command letters to move the spot on the maze
 const int  UP(72);			//up arrow
 const int  DOWN(80); 		//down arrow
@@ -66,7 +66,7 @@ void setKeyDirection(const int key, int& dx, int& dy);
 //----- Update Game
 //---------------------------------------------------------------------------
 
-void updateGameData(const char g[][SIZEX], Snake& spot, const int key, string& mess, int& score, Item& mouse, int& target, int& mouseCount, goBundle& go, const bool& cheat, Item& power, int& delay, int& inv, int& ptimer, Item& M1, Item& M2);
+void updateGameData(const char g[][SIZEX], Snake& spot, const int key, string& mess, int& score, Item& mouse, int& target, int& mouseCount, goBundle& go, const bool& cheat, Item& power, int& delay, int& inv, int& ptimer, Item& M1, Item& M2, const int& countdownTimer);
 
 void placeItem(char g[][SIZEX], const Item& item);
 
@@ -74,11 +74,11 @@ void placeMaze(char grid[][SIZEX], const char maze[][SIZEX]);
 
 void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], Snake& spot, const Item& mouse, const Item& power, const Item& M1, const Item& M2);
 
-void updateGame(char grid[][SIZEX], const char maze[][SIZEX], Snake& spot, const int keyCode, string& mess, int& score, Item& mouse, int& target, int& mouseCount, goBundle& gameOver, const bool& cheat, Item& power, int& delay, int& inv, int& ptimer, Item& M1, Item& M2);
+void updateGame(char grid[][SIZEX], const char maze[][SIZEX], Snake& spot, const int keyCode, string& mess, int& score, Item& mouse, int& target, int& mouseCount, goBundle& gameOver, const bool& cheat, Item& power, int& delay, int& inv, int& ptimer, Item& M1, Item& M2, const int& countdownTimer);
 
 void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], Snake& spot, Item& mouse, Item& power, const Item& M1, const Item& M2);
 
-void moveMongoose(const char g[][SIZEX],Item& M, goBundle& gameOver);
+void moveMongoose(const char g[][SIZEX],Item& M, goBundle& gameOver, const int& countdownTimer);
 
 
 
@@ -97,7 +97,7 @@ string tostring(char x);
 
 void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string& message);
 
-void renderGame(const char g[][SIZEX], const string& mess, const string& score, const string& mouseCount, const string& highScore, const int& inv);
+void renderGame(const char g[][SIZEX], const string& mess, const string& score, const string& mouseCount, const string& highScore, const int& inv, const string& name, int& countdownTimer, const bool& timeInitilized, const int& startTime, const int& countdownTime, goBundle& go);
 
 void makeString(const int& score, const int& mice, string& stringScore, string& stringMouse);
 
