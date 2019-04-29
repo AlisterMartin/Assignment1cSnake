@@ -204,6 +204,8 @@ int main()
 				currentLevel += 1;
 				writeToFile(score, name, currentLevel);
 				currentLevel = selectLevel(name);
+				mouseCount = 0;
+				go.gameOver = false;
 				renderGame(grid, message, stringScore, stringMouse, highScore, inv, name, countdownTimer, timeInitilized, startTime, countdownTime, go, currentLevel);
 			}
 			writeToFile(score, name, currentLevel);
@@ -272,8 +274,8 @@ void updateGameData(const char g[][SIZEX], Snake & spot, const int key, string &
 		mouseCount % 2 == 0 && delay !=100 ? delay -= 100 : delay; //speeds up snake every two mice 
 		if (mouseCount % 3 == 0) {
 			if (mouseCount % 6 == 0) {
-				M2.symbol = MONGOOSE;
-				newMouse(M2, g);
+				//M2.symbol = MONGOOSE;
+				//newMouse(M2, g);
 			}
 			else {
 				M1.symbol = MONGOOSE;
