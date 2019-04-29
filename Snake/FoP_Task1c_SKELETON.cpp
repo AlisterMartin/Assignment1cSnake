@@ -124,7 +124,7 @@ int main()
 	}
 	currentLevel = selectInitialLevel(name);
 
-	while (currentLevel != 9) {
+	while (currentLevel != 9 && !go.gameOver) {
 		clrscr();
 		//action...
 		seed();								//seed the random number generator
