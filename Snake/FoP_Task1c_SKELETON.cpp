@@ -87,6 +87,43 @@ public:
       snake.pop_back();
     }
   }
+  void readout(ofstream& o)
+  {
+    for (int i = 0; i < snake.size(); i++)
+    {
+      o << snake.at(i).x << "," << snake.at(i).y << "," << (int)snake.at(i).symbol << ",";
+    }
+    o << endl;
+  }
+  void readin(const string& i)
+  {
+    vector<int> vect;
+    stringstream ss(i);
+    int r;
+    while (ss.peek() != '/n' && ss >> r)
+    {
+      vect.push_back(r);
+
+      if (ss.peek() == ',')
+        ss.ignore();
+    }
+    for (int c = 0; c < vect.size(); c++)
+    {
+      switch (c % 3) {
+      case 0:
+        snake.push_back({ vect.at(c), 0, 'x' });
+        break;
+      case 1:
+        snake.at(c / 3).y = vect.at(c);
+        break;
+      case 2:
+        snake.at(c / 3).symbol = vect.at(c);
+        break;
+      }
+
+        
+    }
+  }
 };
 //---------------------------------------------------------------------------
 //----- run game
@@ -136,7 +173,7 @@ int main()
 		//action...
 		seed();								//seed the random number generator
 		SetConsoleTitle("FoP 2018-19 - Task 1c - Game Skeleton");
-		initialiseGame(grid, maze, spot, mouse, power, M1, M2, mouseLevelCount, currentLevel, countdownTime);	//initialise grid (incl. walls and spot)
+		saveCheck(name) ? loadSave(spot, mouse, power, M1, M2, mouseLevelCount, currentLevel, countdownTime, name, score, mouseCount, countdownTimer, grid, maze, target): initialiseGame(grid, maze, spot, mouse, power, M1, M2, mouseLevelCount, currentLevel, countdownTime);	//initialise grid (incl. walls and spot)
 		int key, temp_key;//current key selected by player
 		makeString(score, mouseCount, stringScore, stringMouse, mouseLevelCount);
 		renderGame(grid, message, stringScore, stringMouse, highScore, inv, name, countdownTimer, timeInitilized, startTime, countdownTime, go, currentLevel);//display game info, modified grid and messages
@@ -179,12 +216,18 @@ int main()
 					speed = false;
 				}
 			}
+      else if (key == 'O')
+      {
+        saveGame(spot, mouse, power, M1, M2, mouseLevelCount, currentLevel, countdownTime, name, score, mouseCount, countdownTimer, target);
+        go.gameOver = true;
+        go.message = "You saved the game";
+      }
 			else
 				message = "INVALID KEY!";  //set 'Invalid key' message
 			if (mouseCount == mouseLevelCount) {
 				win = true;
 				go.gameOver = true;
-				go.message = "YOU GOT ALL TEH MICE! YOU WIN! Remaining time: " + to_string(countdownTimer);
+				go.message = "YOU GOT ALL THE MICE! YOU WIN! Remaining time: " + to_string(countdownTimer);
 			}
 			makeString(score, mouseCount, stringScore, stringMouse, mouseLevelCount);
 			if (moved && !timeInitilized) {
@@ -249,7 +292,7 @@ void updateGameData(const char g[][SIZEX], Snake & spot, const int key, string &
 		break;
 	case WALL:  		//hit a wall and stay there
 		if (inv > 0) {
-			spot.moveSnake(-(27 * dx), -(10 * dy), target);
+			
 		}
 		else {
 			go.gameOver = true;
@@ -792,6 +835,13 @@ inline bool doesItExist(const string& name) {
 	return !input.fail();
 }
 
+bool saveCheck(const string& name) {
+  ifstream input;
+  string fileName = name + ".save";
+  input.open(fileName, ios::in);
+  return !input.fail();
+}
+
 string getName() {
 	string name;
 
@@ -807,4 +857,88 @@ string getName() {
 	clrscr();
 
 	return name;
+}
+
+void saveGame(Snake & spot, const Item & mouse, const Item & power, const Item& M1, const Item& M2, const int& mouseLevelCount, const int& currentLevel, const int& countdownTime, const string& name, const int& score, const int& mouseCount, const int& countdownTimer, const int& target) {
+  ofstream out;
+  out.open(name + ".save", ios::out);
+  spot.readout(out);
+  out << currentLevel << endl;
+  out << score << endl;
+  out << mouseCount << endl;
+  out << countdownTimer << endl;
+  out << mouse.x << endl;
+  out << mouse.y << endl;
+  out << mouse.symbol << endl;
+  out << M1.x << endl;
+  out << M1.y << endl;
+  out << M1.symbol << endl;
+  out << M2.x << endl;
+  out << M2.y << endl;
+  out << M2.symbol << endl;
+  out << mouseLevelCount << endl;
+  out << target << endl;
+  out.close();
+}
+
+
+void loadSave(Snake & spot, Item & mouse, Item & power, Item& M1, Item& M2, int& mouseLevelCount, int& currentLevel, int& countdownTime, string& name, int& score, int& mouseCount, int& countdownTimer, char grid[][SIZEX], char maze[][SIZEX], int& target) {
+  ifstream in;
+  in.open(name + ".save", ios::in);
+  string tmp_spot;
+  string tmp_currentLevel;
+  string tmp_score;
+  string tmp_mouseCount;
+  string tmp_countdownTimer;
+  string tmp_mousex;
+  string tmp_mousey;
+  string tmp_mousesymbol;
+  string tmp_M1x;
+  string tmp_M1y;
+  string tmp_M1symbol;
+  string tmp_M2x;
+  string tmp_M2y;
+  string tmp_M2symbol;
+  string tmp_mouseLevelCount;
+  string tmp_target;
+
+  getline(in, tmp_spot);
+  spot.readin(tmp_spot);
+  
+  getline(in, tmp_currentLevel);
+  getline(in, tmp_score);
+  getline(in, tmp_mouseCount);
+  getline(in, tmp_countdownTimer);
+  getline(in, tmp_mousex);
+  getline(in, tmp_mousey);
+  getline(in, tmp_mousesymbol);
+  getline(in, tmp_M1x);
+  getline(in, tmp_M1y);
+  getline(in, tmp_M1symbol);
+  getline(in, tmp_M2x);
+  getline(in, tmp_M2y);
+  getline(in, tmp_M2symbol);
+  getline(in, tmp_mouseLevelCount);
+  getline(in, tmp_target);
+  in.close();
+
+  currentLevel = stoi(tmp_currentLevel);
+  score = stoi(tmp_score);
+  mouseCount = stoi(tmp_mouseCount);
+  countdownTimer = stoi(tmp_countdownTimer);
+  mouse.x = stoi(tmp_mousex);
+  mouse.y = stoi(tmp_mousey);
+  mouse.symbol = tmp_mousesymbol.at(0);
+  M1.x = stoi(tmp_M1x);
+  M1.y = stoi(tmp_M1y);
+  M1.symbol = tmp_M1symbol.at(0);
+  M2.x = stoi(tmp_M2x);
+  M2.y = stoi(tmp_M2y);
+  M2.symbol = tmp_M2symbol.at(0);
+  mouseLevelCount = stoi(tmp_mouseLevelCount);
+  target = stoi(tmp_target);
+
+  setInitialMazeStructure(maze, mouseLevelCount, currentLevel, countdownTime);		   //initialise maze
+  updateGrid(grid, maze, spot, mouse, power, M1, M2);		   //prepare grid
+  remove((name + ".save").c_str());
 }

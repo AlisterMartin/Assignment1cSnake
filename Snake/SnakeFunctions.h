@@ -124,3 +124,7 @@ int getAvailableLevel(const string& name);
 int selectInitialLevel(const string& name);
 
 int selectLevel(const string& name);
+
+bool saveCheck(const string& name);
+void loadSave(Snake & spot, Item & mouse, Item & power, Item& M1, Item& M2, int& mouseLevelCount, int& currentLevel, int& countdownTime, string& name, int& score, int& mouseCount, int& countdownTimer, char grid[][SIZEX], char maze[][SIZEX], int& target);
+void saveGame(Snake & spot, const Item & mouse, const Item & power, const Item& M1, const Item& M2, const int& mouseLevelCount, const int& currentLevel, const int& countdownTime, const string& name, const int& score, const int& mouseCount, const int& countdownTimer, const int& target);
