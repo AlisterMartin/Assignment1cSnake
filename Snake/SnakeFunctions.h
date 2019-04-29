@@ -52,7 +52,7 @@ bool isArrowKey(const int key);
 
 void newMouse(Item& mouse, const char maze[][SIZEX]);
 
-void setInitialMazeStructure(char maze[][SIZEX]);
+void setInitialMazeStructure(char maze[][SIZEX], int& mouseLevelCount, const int& currentLevel, int& countdownTime);
 
 //---------------------------------------------------------------------------
 //----- process key
@@ -76,7 +76,7 @@ void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], Snake& spot, const
 
 void updateGame(char grid[][SIZEX], const char maze[][SIZEX], Snake& spot, const int keyCode, string& mess, int& score, Item& mouse, int& target, int& mouseCount, goBundle& gameOver, const bool& cheat, Item& power, int& delay, int& inv, int& ptimer, Item& M1, Item& M2, const int& countdownTimer);
 
-void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], Snake& spot, Item& mouse, Item& power, const Item& M1, const Item& M2);
+void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], Snake& spot, Item& mouse, Item& power, const Item& M1, const Item& M2, int& mouseLevelCount, const int& currentLevel, int& countdownTime);
 
 void moveMongoose(const char g[][SIZEX],Item& M, goBundle& gameOver, const int& countdownTimer);
 
@@ -97,9 +97,9 @@ string tostring(char x);
 
 void showMessage(const WORD backColour, const WORD textColour, int x, int y, const string& message);
 
-void renderGame(const char g[][SIZEX], const string& mess, const string& score, const string& mouseCount, const string& highScore, const int& inv, const string& name, int& countdownTimer, const bool& timeInitilized, const int& startTime, const int& countdownTime, goBundle& go);
+void renderGame(const char g[][SIZEX], const string& mess, const string& score, const string& mouseCount, const string& highScore, const int& inv, const string& name, int& countdownTimer, const bool& timeInitilized, const int& startTime, const int& countdownTime, goBundle& go, const int& currentLevel);
 
-void makeString(const int& score, const int& mice, string& stringScore, string& stringMouse);
+void makeString(const int& score, const int& mice, string& stringScore, string& stringMouse, const int& mouseLevelCount);
 
 void endProgram(const goBundle& go);
 

@@ -95,9 +95,10 @@ int main()
 	int startTime;
 	int currentTime;
 	int countdownTimer;
-	int countdownTime = 10;				//to be set by reading level files
+	int countdownTime = 0;				//to be set by reading level files
 	bool moved = false;
 	bool timeInitilized = false;
+	int mouseLevelCount(0);
 	int currentLevel = 1;				//to be set by reading indiviual files
 	Snake spot;							//Initialise new snake class
 	//Item spot = { 0, 0, SPOT }; 		//spot's position and symbol
@@ -128,10 +129,10 @@ int main()
 		//action...
 		seed();								//seed the random number generator
 		SetConsoleTitle("FoP 2018-19 - Task 1c - Game Skeleton");
-		initialiseGame(grid, maze, spot, mouse, power, M1, M2);	//initialise grid (incl. walls and spot)
+		initialiseGame(grid, maze, spot, mouse, power, M1, M2, mouseLevelCount, currentLevel, countdownTime);	//initialise grid (incl. walls and spot)
 		int key, temp_key;//current key selected by player
-		makeString(score, mouseCount, stringScore, stringMouse);
-		renderGame(grid, message, stringScore, stringMouse, highScore, inv, name, countdownTimer, timeInitilized, startTime, countdownTime, go);//display game info, modified grid and messages
+		makeString(score, mouseCount, stringScore, stringMouse, mouseLevelCount);
+		renderGame(grid, message, stringScore, stringMouse, highScore, inv, name, countdownTimer, timeInitilized, startTime, countdownTime, go, currentLevel);//display game info, modified grid and messages
 		key = toupper(getKeyPress());
 		do {
 			Sleep(delay);
@@ -173,36 +174,37 @@ int main()
 			}
 			else
 				message = "INVALID KEY!";  //set 'Invalid key' message
-			if (mouseCount == 7) {
+			if (mouseCount == mouseLevelCount) {
 				win = true;
 				go.gameOver = true;
 				go.message = "YOU GOT ALL TEH MICE! YOU WIN! Remaining time: " + to_string(countdownTimer);
 			}
-			makeString(score, mouseCount, stringScore, stringMouse);
+			makeString(score, mouseCount, stringScore, stringMouse, mouseLevelCount);
 			if (moved && !timeInitilized) {
 				startTime = getIntTime();
 				timeInitilized = true;
 			}
-			renderGame(grid, message, stringScore, stringMouse, highScore, inv, name, countdownTimer, timeInitilized, startTime, countdownTime, go);//display game info, modified grid and messages
+			renderGame(grid, message, stringScore, stringMouse, highScore, inv, name, countdownTimer, timeInitilized, startTime, countdownTime, go, currentLevel);//display game info, modified grid and messages
 			if (countdownTimer < 0) {
 				go.gameOver = true;
 				go.message = "YOU RAN OUT OF TIME!";
 			}
 		} while (!wantsToQuit(key) && !go.gameOver);		//while user does not want to quit
-		makeString(score, mouseCount, stringScore, stringMouse);
-		renderGame(grid, message, stringScore, stringMouse, highScore, inv, name, countdownTimer, timeInitilized, startTime, countdownTime, go);			//display game info, modified grid and messages
+		makeString(score, mouseCount, stringScore, stringMouse, mouseLevelCount);
+		renderGame(grid, message, stringScore, stringMouse, highScore, inv, name, countdownTimer, timeInitilized, startTime, countdownTime, go, currentLevel);			//display game info, modified grid and messages
 
 		//update file
-		if (!hasCheated /*&& win*/) {
+		if (!hasCheated && win) {
 			if (currentLevel == 3) {
 				go.message = "WELL DONE! You finished the game with score: " + tostring(score);
+				currentLevel = 9;
 			}
 			else
 			{
 				currentLevel += 1;
 				writeToFile(score, name, currentLevel);
 				currentLevel = selectLevel(name);
-				renderGame(grid, message, stringScore, stringMouse, highScore, inv, name, countdownTimer, timeInitilized, startTime, countdownTime, go);
+				renderGame(grid, message, stringScore, stringMouse, highScore, inv, name, countdownTimer, timeInitilized, startTime, countdownTime, go, currentLevel);
 			}
 			writeToFile(score, name, currentLevel);
 
@@ -309,8 +311,6 @@ void updateGrid(char grid[][SIZEX], const char maze[][SIZEX], Snake & spot, cons
 	placeItem(grid, mouse); //set mouse in grid
 	placeItem(grid, M1);
 	placeItem(grid, M2);
-	
-
 }
 
 void updateGame(char grid[][SIZEX], const char maze[][SIZEX], Snake & spot, const int keyCode, string & mess, int & score, Item & mouse, int & target, int & mouseCount, goBundle& go,const bool& cheat, Item& power, int& delay, int& inv, int& ptimer, Item& M1, Item& M2, const int& countdownTimer)
@@ -378,9 +378,9 @@ void moveMongoose(const char g[][SIZEX],Item& M,goBundle& go, const int& countdo
 	}
 }
 
-void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], Snake & spot, Item & mouse, Item & power, const Item& M1, const Item& M2)
+void initialiseGame(char grid[][SIZEX], char maze[][SIZEX], Snake & spot, Item & mouse, Item & power, const Item& M1, const Item& M2, int& mouseLevelCount, const int& currentLevel, int& countdownTime)
 { //initialise grid and place spot in middle
-	setInitialMazeStructure(maze);		   //initialise maze
+	setInitialMazeStructure(maze, mouseLevelCount, currentLevel, countdownTime);		   //initialise maze
 	spot.initSnake(maze);
 	//setSpotInitialCoordinates(spot, maze); //sets spots posititon
 	newMouse(mouse, maze);				   //sets mouses position
@@ -425,7 +425,7 @@ void showMessage(const WORD backColour, const WORD textColour, int x, int y, con
 	cout << message /*+ string(40 - message.length(), ' ')*/;
 }
 
-void renderGame(const char g[][SIZEX], const string& mess, const string& score, const string& mouseCount, const string& highScore, const int& inv, const string& name, int& countdownTimer, const bool& timeInitilized, const int& startTime, const int& countdownTime, goBundle& go)
+void renderGame(const char g[][SIZEX], const string& mess, const string& score, const string& mouseCount, const string& highScore, const int& inv, const string& name, int& countdownTimer, const bool& timeInitilized, const int& startTime, const int& countdownTime, goBundle& go, const int& currentLevel)
 { //display game title, messages, maze, spot and other items on screen
 	if (timeInitilized && !go.gameOver) {
 		countdownTimer = (countdownTime - (getIntTime() - startTime));
@@ -443,11 +443,12 @@ void renderGame(const char g[][SIZEX], const string& mess, const string& score, 
 	//print auxiliary messages if any
 	showMessage(clBlack, clWhite, 40, 7, mess);	//display current message
 	showMessage(clBlack, clWhite, 40, 8, "Player Name: " + name);
-	showMessage(clBlack, clWhite, 40, 9, "Current High Score: " + highScore);
-	showMessage(clBlack, clWhite, 40, 10, "Countdown Timer: " + secondsToString(countdownTimer) + "                          ");
-	showMessage(clBlack, clWhite, 40, 11, score);
-	showMessage(clBlack, clWhite, 40, 12, mouseCount);
-  inv > 0 ? showMessage(clBlack, clWhite, 40, 13, "Invincible") : showMessage(clBlack, clWhite, 40, 12, "          ");
+	showMessage(clBlack, clWhite, 40, 9, "Current Level: " + tostring(currentLevel));
+	showMessage(clBlack, clWhite, 40, 10, "Current High Score: " + highScore);
+	showMessage(clBlack, clWhite, 40, 11, "Countdown Timer: " + secondsToString(countdownTimer) + "                          ");
+	showMessage(clBlack, clWhite, 40, 12, score);
+	showMessage(clBlack, clWhite, 40, 13, mouseCount);
+  inv > 0 ? showMessage(clBlack, clWhite, 40, 14, "Invincible") : showMessage(clBlack, clWhite, 40, 12, "          ");
 
 
 	//display grid contents
@@ -456,13 +457,13 @@ void renderGame(const char g[][SIZEX], const string& mess, const string& score, 
 
 
 //creates two strings 1 for showing score the other for showing the amount of mice collected
-void makeString(const int & score, const int & mice, string& stringScore, string& stringMouse) {
+void makeString(const int & score, const int & mice, string& stringScore, string& stringMouse, const int& mouseLevelCount) {
 	ostringstream sout;
 	istringstream sin;
 	sout << "Score:" << score;
 	stringScore = sout.str();
 	sout.str("");
-	sout << mice << " mice collected out of 7";
+	sout << mice << " mice collected out of " << to_string(mouseLevelCount);
 	stringMouse = sout.str();
 	sout.str("");
 }
@@ -595,11 +596,42 @@ void newMouse(Item& mouse, const char maze[][SIZEX]) {
 //----- initialise game state
 //---------------------------------------------------------------------------
 
-void setInitialMazeStructure(char maze[][SIZEX])
+void setInitialMazeStructure(char maze[][SIZEX], int& mouseLevelCount, const int& currentLevel, int& countdownTime)
 { //set the position of the walls in the maze
+	int initialMaze[SIZEY][SIZEX]; //local array to store the maze structure
+
+	if (currentLevel == 1) {
+		ifstream file{ "level1.maz" };
+		for (int i = 0; i < SIZEY; i++) {
+			for (int j = 0; j < SIZEX; j++) {
+			file >> initialMaze[i][j];
+			}
+		}
+		file >> mouseLevelCount;
+		file >> countdownTime;
+	}
+	if (currentLevel == 2) {
+		ifstream file{ "level2.maz" };
+		for (int i = 0; i < SIZEY; i++) {
+			for (int j = 0; j < SIZEX; j++) {
+				file >> initialMaze[i][j];
+			}
+		}
+		file >> mouseLevelCount;
+		file >> countdownTime;
+	}
+	if (currentLevel == 3) {
+		ifstream file{ "level3.maz" };
+		for (int i = 0; i < SIZEY; i++) {
+			for (int j = 0; j < SIZEX; j++) {
+				file >> initialMaze[i][j];
+			}
+		}
+		file >> mouseLevelCount;
+		file >> countdownTime;
+	}
   //initialise maze configuration
-	char initialMaze[SIZEY][SIZEX] 	//local array to store the maze structure
-		= {
+		/*= {
 			{ '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' },
 			{ '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
 			{ '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
@@ -612,16 +644,18 @@ void setInitialMazeStructure(char maze[][SIZEX])
 			{ '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
 			{ '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
 			{ '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#' },
-			{ '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' } };
+			{ '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#' } };/**/
 	//with '#' for wall, ' ' for tunnel, etc. 
 	//copy into maze structure with appropriate symbols
+	
+
 	for (int row(0); row < SIZEY; ++row)
 		for (int col(0); col < SIZEX; ++col)
 			switch (initialMaze[row][col])
 			{
 				//not a direct copy, in case the symbols used are changed
-			case '#': maze[row][col] = WALL; break;
-			case ' ': maze[row][col] = TUNNEL; break;
+			case 1: maze[row][col] = WALL; break;
+			case 0: maze[row][col] = TUNNEL; break;
 			}
 }
 
