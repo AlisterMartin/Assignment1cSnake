@@ -76,18 +76,18 @@ public:
 			snake.pop_back(); //take the back item off until it is the original size
 		}
 	}
-	Item getHead()
+	Item getHead() // return the head of the snake
 	{
 		return snake.front();
 	}
-  void kill()
+  void kill() // empty the snake vector
   {
     while (snake.size() > 0)
     {
       snake.pop_back();
     }
   }
-  void readout(ofstream& o)
+  void readout(ofstream& o) // put all of the snake pieces into an file stream
   {
     for (int i = 0; i < snake.size(); i++)
     {
@@ -95,7 +95,7 @@ public:
     }
     o << endl;
   }
-  void readin(const string& i)
+  void readin(const string& i) // construct a snake from a file stream
   {
     vector<int> vect;
     stringstream ss(i);
@@ -222,6 +222,11 @@ int main()
         go.gameOver = true;
         go.message = "You saved the game";
       }
+      else if (wantsToQuit(key))
+      {
+        go.gameOver = true;
+        go.message = "You quit the game";
+      }
 			else
 				message = "INVALID KEY!";  //set 'Invalid key' message
 			if (mouseCount == mouseLevelCount) {
@@ -239,7 +244,7 @@ int main()
 				go.gameOver = true;
 				go.message = "YOU RAN OUT OF TIME!";
 			}
-		} while (!wantsToQuit(key) && !go.gameOver);		//while user does not want to quit
+		} while (!go.gameOver);		//while user does not want to quit
 		makeString(score, mouseCount, stringScore, stringMouse, mouseLevelCount);
 		renderGame(grid, message, stringScore, stringMouse, highScore, inv, name, countdownTimer, timeInitilized, startTime, countdownTime, go, currentLevel);			//display game info, modified grid and messages
 
