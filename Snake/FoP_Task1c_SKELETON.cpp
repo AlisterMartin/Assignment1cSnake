@@ -241,7 +241,7 @@ void updateGameData(const char g[][SIZEX], Snake & spot, const int key, string &
 		break;
 	case WALL:  		//hit a wall and stay there
 		if (inv > 0) {
-			spot.moveSnake(-(12 * dx), -(10 * dy), target);
+			spot.moveSnake(-(27 * dx), -(10 * dy), target);
 		}
 		else {
 			go.gameOver = true;
