@@ -205,7 +205,11 @@ int main()
 				writeToFile(score, name, currentLevel);
 				currentLevel = selectLevel(name);
 				mouseCount = 0;
+				Snake s;
+				spot = s;
+				spot.initSnake(maze);
 				go.gameOver = false;
+				win = false;
 				renderGame(grid, message, stringScore, stringMouse, highScore, inv, name, countdownTimer, timeInitilized, startTime, countdownTime, go, currentLevel);
 			}
 			writeToFile(score, name, currentLevel);
