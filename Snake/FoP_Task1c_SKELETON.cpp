@@ -166,7 +166,7 @@ int main()
 	{
 		highScore = getHighScore(name);
 	}
-	currentLevel = selectInitialLevel(name);
+	currentLevel = selectInitialLevel(name, hasCheated);
 
 	while (currentLevel != 9 && !go.gameOver) {
 		clrscr();
@@ -249,16 +249,21 @@ int main()
 		renderGame(grid, message, stringScore, stringMouse, highScore, inv, name, countdownTimer, timeInitilized, startTime, countdownTime, go, currentLevel);			//display game info, modified grid and messages
 
 		//update file
-		if (!hasCheated && win) {
+		if (win) {
 			if (currentLevel == 3) {
 				go.message = "WELL DONE! You finished the game with score: " + tostring(score);
+				if(!hasCheated)
+				writeToFile(score, name, currentLevel);
 				currentLevel = 9;
 			}
 			else
 			{
+
+				endProgram(go);
 				currentLevel += 1;
+				if (!hasCheated)
 				writeToFile(score, name, currentLevel);
-				currentLevel = selectLevel(name);
+				currentLevel = selectLevel(name, hasCheated);
 				mouseCount = 0;
         target = 4;
         spot.kill();
@@ -268,9 +273,11 @@ int main()
 				win = false;
 				renderGame(grid, message, stringScore, stringMouse, highScore, inv, name, countdownTimer, timeInitilized, startTime, countdownTime, go, currentLevel);
 			}
-			writeToFile(score, name, currentLevel);
 
 			//reset all values
+		}
+		if (currentLevel == 9) {
+			go.message = "Thank you for playing our game";
 		}
 	}
 	endProgram(go);						//display final message
@@ -322,7 +329,7 @@ void updateGameData(const char g[][SIZEX], Snake & spot, const int key, string &
 		if (mouseCount % 2 == 0)
 		{
 			power.symbol = POWER;
-			ptimer = 15;
+			ptimer = 40;
 			newMouse(power, g);	//place the power pill in the grid if 
 		}
 		if (!cheat)
@@ -331,17 +338,12 @@ void updateGameData(const char g[][SIZEX], Snake & spot, const int key, string &
 		}
 		score += 10;
 		spot.moveSnake(dx, dy, target);
-		mouseCount % 2 == 0 && delay !=100 ? delay -= 100 : delay; //speeds up snake every two mice 
-		if (mouseCount % 3 == 0) {
-			if (mouseCount % 6 == 0) {
-				//M2.symbol = MONGOOSE;
-				//newMouse(M2, g);
-			}
-			else {
+		mouseCount % 2 == 0 && delay !=100 ? delay -= 50 : delay; //speeds up snake every two mice 
+		if (mouseCount == 3) {
 				M1.symbol = MONGOOSE;
 				newMouse(M1, g);
 			}
-		}
+		
 		break;
 	case POWER:
     inv = 20;
@@ -510,7 +512,7 @@ void renderGame(const char g[][SIZEX], const string& mess, const string& score, 
 	showMessage(clBlack, clWhite, 40, 11, "Countdown Timer: " + secondsToString(countdownTimer) + "                          ");
 	showMessage(clBlack, clWhite, 40, 12, score);
 	showMessage(clBlack, clWhite, 40, 13, mouseCount);
-  inv > 0 ? showMessage(clBlack, clWhite, 40, 14, "Invincible") : showMessage(clBlack, clWhite, 40, 12, "          ");
+  inv > 0 ? showMessage(clBlack, clWhite, 40, 14, "Invincible") : showMessage(clBlack, clWhite, 40, 14, "                        ");
 
 
 	//display grid contents
@@ -536,37 +538,57 @@ void endProgram(const goBundle& go)
 	showMessage(clRed, clYellow, 36, 10, go.message);
 	gotoxy(36, 12);
 	system("pause");	//hold output screen until a keyboard key is hit
+	selectBackColour(clBlack);
 }
 
-int selectInitialLevel(const string& name) {
+int selectInitialLevel(const string& name, bool& hasCheated) {
 	int maxLevel = getAvailableLevel(name);
 	int input = -1;
 	clrscr();
 	switch (maxLevel) {
 	case 1 :
+		showMessage(clRed, clYellow, 36, 6, "To activate cheat mode, enter 6");
 		showMessage(clRed, clYellow, 36, 10, "Welcome to the game, please press 1 to start");
 		gotoxy(36, 11);
 		cin >> input;
-		while (input != 1) {
+		while (input != 1 && input != 6) {
 			showMessage(clRed, clYellow, 36, 9, "ERROR, please select the correct number");
 			cin >> input;
 		}
 		break;
 	case 2 :
+		showMessage(clRed, clYellow, 36, 6, "To activate cheat mode, enter 6");
 		showMessage(clRed, clYellow, 36, 9, "Welcome to the game, please select a level");
 		showMessage(clRed, clYellow, 36, 10, "Press 1 to play level 1 again");
 		showMessage(clRed, clYellow, 36, 11, "Press 2 to play level 2");
 		gotoxy(36, 12);
 		cin >> input;
-		while (input != 1 && input != 2) {
+		while (input != 1 && input != 2 && input != 6) {
 			showMessage(clRed, clYellow, 36, 8, "ERROR, please select the correct number");
 			cin >> input;
 		}
 		break;
 	case 3 :
+		showMessage(clRed, clYellow, 36, 6, "To activate cheat mode, enter 6");
 		showMessage(clRed, clYellow, 36, 9, "Welcome to the game, please select a level");
 		showMessage(clRed, clYellow, 36, 10, "Press 1 to play level 1 again");
 		showMessage(clRed, clYellow, 36, 11, "Press 2 to play level 2 again");
+		showMessage(clRed, clYellow, 36, 12, "Press 3 to play level 3");
+		gotoxy(36, 13);
+		cin >> input;
+		while (input != 1 && input != 2 && input != 3 && input != 6) {
+			showMessage(clRed, clYellow, 36, 8, "ERROR, please select the correct number");
+			cin >> input;
+		}
+		break;
+	}
+	selectBackColour(clBlack);
+	if (input == 6) {
+		clrscr();
+		hasCheated = true;
+		showMessage(clRed, clYellow, 36, 9, "Welcome to cheat mode, please select a level");
+		showMessage(clRed, clYellow, 36, 10, "Press 1 to play level 1");
+		showMessage(clRed, clYellow, 36, 11, "Press 2 to play level 2");
 		showMessage(clRed, clYellow, 36, 12, "Press 3 to play level 3");
 		gotoxy(36, 13);
 		cin >> input;
@@ -574,30 +596,31 @@ int selectInitialLevel(const string& name) {
 			showMessage(clRed, clYellow, 36, 8, "ERROR, please select the correct number");
 			cin >> input;
 		}
-		break;
 	}
 	selectBackColour(clBlack);
 	return input;
 }
 
-int selectLevel(const string& name) {
+int selectLevel(const string& name, bool& hasCheated) {
 	int maxLevel = getAvailableLevel(name);
 	int input = -1;
 	clrscr();
 	switch(maxLevel) {
 	case 2 : 
+		showMessage(clRed, clYellow, 36, 6, "To activate cheat mode, enter 6");
 		showMessage(clRed, clYellow, 36, 9, "Level 1 completed");
 		showMessage(clRed, clYellow, 36, 10, "Press 1 to play level 1 again");
 		showMessage(clRed, clYellow, 36, 11, "Press 2 to play level 2");
 		showMessage(clRed, clYellow, 36, 12, "Press 9 to quit");
 		gotoxy(36, 13);
 		cin >> input;
-		while (input != 1 && input != 2 && input != 9) {
+		while (input != 1 && input != 2 && input != 9 && input != 6) {
 			showMessage(clRed, clYellow, 36, 8, "ERROR, please select the correct number");
 			cin >> input;
 		}
 		break;
 	case 3 :
+		showMessage(clRed, clYellow, 36, 6, "To activate cheat mode, enter 6");
 		showMessage(clRed, clYellow, 36, 8, "Level 2 completed");
 		showMessage(clRed, clYellow, 36, 9, "Press 1 to play level 1");
 		showMessage(clRed, clYellow, 36, 10, "Press 2 to play level 2 again");
@@ -605,11 +628,26 @@ int selectLevel(const string& name) {
 		showMessage(clRed, clYellow, 36, 12, "Press 9 to quit");
 		gotoxy(36, 13);
 		cin >> input;
-		while (input != 1 && input != 2 && input!= 3 && input != 9) {
+		while (input != 1 && input != 2 && input!= 3 && input != 9 && input != 6) {
 			showMessage(clRed, clYellow, 36, 7, "ERROR, please select the correct number");
 			cin >> input;
 		}
 		break;
+	}
+	selectBackColour(clBlack);
+	if (input == 6) {
+		clrscr();
+		hasCheated = true;
+		showMessage(clRed, clYellow, 36, 9, "Welcome to cheat mode, please select a level");
+		showMessage(clRed, clYellow, 36, 10, "Press 1 to play level 1");
+		showMessage(clRed, clYellow, 36, 11, "Press 2 to play level 2");
+		showMessage(clRed, clYellow, 36, 12, "Press 3 to play level 3");
+		gotoxy(36, 13);
+		cin >> input;
+		while (input != 1 && input != 2 && input != 3) {
+			showMessage(clRed, clYellow, 36, 8, "ERROR, please select the correct number");
+			cin >> input;
+		}
 	}
 	selectBackColour(clBlack);
 	return input;
