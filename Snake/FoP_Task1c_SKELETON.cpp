@@ -80,6 +80,13 @@ public:
 	{
 		return snake.front();
 	}
+  void kill()
+  {
+    while (snake.size() > 0)
+    {
+      snake.pop_back();
+    }
+  }
 };
 //---------------------------------------------------------------------------
 //----- run game
@@ -205,9 +212,10 @@ int main()
 				writeToFile(score, name, currentLevel);
 				currentLevel = selectLevel(name);
 				mouseCount = 0;
-				Snake s;
-				spot = s;
-				spot.initSnake(maze);
+        target = 4;
+        spot.kill();
+        M1.symbol = ' ';
+        delay = 400;
 				go.gameOver = false;
 				win = false;
 				renderGame(grid, message, stringScore, stringMouse, highScore, inv, name, countdownTimer, timeInitilized, startTime, countdownTime, go, currentLevel);
